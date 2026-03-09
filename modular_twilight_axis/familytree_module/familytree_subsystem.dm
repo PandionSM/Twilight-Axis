@@ -180,8 +180,10 @@ SUBSYSTEM_DEF(familytree)
 	if(!job || !baseline)
 		return FALSE
 
-	job.allowed_races = islist(baseline["allowed_races"]) ? baseline["allowed_races"].Copy() : list()
-	job.allowed_sexes = islist(baseline["allowed_sexes"]) ? baseline["allowed_sexes"].Copy() : list()
+	var/list/baseline_allowed_races = baseline["allowed_races"]
+	var/list/baseline_allowed_sexes = baseline["allowed_sexes"]
+	job.allowed_races = islist(baseline_allowed_races) ? baseline_allowed_races.Copy() : list()
+	job.allowed_sexes = islist(baseline_allowed_sexes) ? baseline_allowed_sexes.Copy() : list()
 	job.total_positions = baseline["total_positions"]
 	job.spawn_positions = baseline["spawn_positions"]
 

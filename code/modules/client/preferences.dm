@@ -738,7 +738,7 @@ GLOBAL_LIST_EMPTY(chosen_names)
 
 
 			dat += "<br><b>Family Preferences:</b> <a href='?_src_=prefs;preference=family_options;task=input'>Change</a>" // TA EDIT
-			dat += "<br><b>Loadout Items:</b> <a href='?_src_=prefs;preference=loadout_item;tdask=input'>Change</a>"
+			dat += "<br><b>Loadout Items:</b> <a href='?_src_=prefs;preference=loadout_item;task=input'>Change</a>"
 
 			dat += "</td>"
 

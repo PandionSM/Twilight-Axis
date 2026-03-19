@@ -153,6 +153,6 @@
 			H.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/repulse)
 			H.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/invisibility)
 			H.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/projectile/fetch)
-			H.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/stasis/runed)
+		//	H.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/stasis/runed)
 			ADD_TRAIT(H, TRAIT_PERFECT_TRACKER, TRAIT_GENERIC)
 			ADD_TRAIT(H, TRAIT_BLACKBAGGER, TRAIT_GENERIC)

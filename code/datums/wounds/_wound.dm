@@ -273,8 +273,25 @@ GLOBAL_LIST_INIT(primordial_wounds, init_primordial_wounds())
 		if(!owner || QDELETED(owner) || QDELETED(src))
 			return FALSE
 
+	if(HAS_TRAIT(owner, TRAIT_PSYDONITE_4) && !HAS_TRAIT(owner, TRAIT_PARALYSIS) && owner.blood_volume > BLOOD_VOLUME_SURVIVE && owner.stat < UNCONSCIOUS) //TA EDIT START
+		var/healamount = 0.4 + (owner.STAWIL * 0.1)
+		heal_wound(healamount)
+		if(!owner || QDELETED(owner) || QDELETED(src))
+			return FALSE
+	else if(HAS_TRAIT(owner, TRAIT_PSYDONITE_3) && !HAS_TRAIT(owner, TRAIT_PARALYSIS) && owner.blood_volume > BLOOD_VOLUME_SURVIVE && owner.stat < UNCONSCIOUS)
+		var/healamount = 0.2 + (owner.STAWIL * 0.1)
+		heal_wound(healamount)
+		if(!owner || QDELETED(owner) || QDELETED(src))
+			return FALSE
+	else if(HAS_TRAIT(owner, TRAIT_PSYDONITE_2) && !HAS_TRAIT(owner, TRAIT_PARALYSIS) && owner.blood_volume > BLOOD_VOLUME_SURVIVE && owner.stat < UNCONSCIOUS)
+		var/healamount = owner.STAWIL * 0.1
+		heal_wound(healamount)
+		if(!owner || QDELETED(owner) || QDELETED(src))
+			return FALSE
+	//TA EDIT END
+
 	if(HAS_TRAIT(owner, TRAIT_PSYDONITE) && !passive_healing)
-		heal_wound(0.6)
+		heal_wound(0.2)
 		if(!owner || QDELETED(owner) || QDELETED(src))
 			return FALSE
 

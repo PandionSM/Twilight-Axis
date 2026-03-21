@@ -118,6 +118,20 @@
 						to_chat(holder, span_boldnotice("I have unlocked a new trait: [trait]"))
 					ADD_TRAIT(holder, trait, ROUNDSTART_TRAIT)
 
+					if(istype(patron, /datum/patron/old_god)) //TA EDIT START
+						run_psydon_updates(trait)
+
+/datum/devotion/proc/run_psydon_updates(trait)
+	if(!holder || !holder.mind)
+		return
+	if(trait == TRAIT_PSYDONITE_4)
+		REMOVE_TRAIT(holder, TRAIT_PSYDONITE_3, TRAIT_MIRACLE)
+		REMOVE_TRAIT(holder, TRAIT_PSYDONITE_2, TRAIT_MIRACLE)
+	else if(trait == TRAIT_PSYDONITE_3)
+		REMOVE_TRAIT(holder, TRAIT_PSYDONITE_2, TRAIT_MIRACLE)
+	if(trait == TRAIT_PSYDONIC_MEDICINE)
+		holder.adjust_skillrank(/datum/skill/misc/medicine, 2, TRUE)
+	//TA EDIT END
 
 //The main proc that distributes all the needed devotion tweaks to the given class.
 //cleric_tier 		- The cleric tier that the holder will get spells of immediately.

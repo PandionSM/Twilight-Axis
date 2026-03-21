@@ -289,6 +289,10 @@
 #define TRAIT_FOOD_STIPEND "Vomitorium-known"
 
 //TA TRAITS
+#define TRAIT_PSYDONITE_2 "Psydonic Resptie"
+#define TRAIT_PSYDONITE_3 "Psydonic Respite (II)"
+#define TRAIT_PSYDONITE_4 "Psydonic Respite (III)"
+#define TRAIT_PSYDONIC_MEDICINE "My Hands are Steady by HIS Grace"
 #define TRAIT_CLERGY_TA "Decem Dii Vult"
 #define TRAIT_FIREARMS_MARKSMAN "Expert Gunslinger" // They keep saying firearms are too easy to level up. Unlocks Master and Legendary Firearms.
 #define TRAIT_VILLAIN "Villain"
@@ -533,6 +537,10 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_FOG_WARDED = span_info("I am protected from Necra's deadly fog. The revenants won't find me... for now."),
 
 	TRAIT_CLERGY_TA = span_notice("My oath empowers me when I am within the Temple's walls, or near my spiritual guide, the Bishop."), //TA TRAITS FROM HERE
+	TRAIT_PSYDONITE_2 = span_info("My body is a temple of iron will; the stronger my willpower, the faster my flesh knits back together."),
+	TRAIT_PSYDONITE_3 = span_info("My body is a temple of iron will; the stronger my willpower, the faster my flesh knits back together."),
+	TRAIT_PSYDONITE_4 = span_info("My body is a temple of iron will; the stronger my willpower, the faster my flesh knits back together."),
+	TRAIT_PSYDONIC_MEDICINE = span_info("My medical skills know no match among those of Psydon, for it is HE who guides me to save lyves of HIS children."),
 	TRAIT_FIREARMS_MARKSMAN = span_greentext("I'm an experienced gunslinger, and have spent many years learning to shoot firearms accurately over great distances. Firearms can progress to Legendary levels."),
 	TRAIT_VILLAIN = span_warning("I am a devious, conniving villain!"),
 	TRAIT_WOUNDREGEN = span_info("My wounds and bones mend on their own, my bleeding clots quickly.."),

@@ -8,6 +8,8 @@ type FamilyType = 'none' | 'member' | 'parent' | 'couple';
 type SpeciesMode = 'ANY' | 'SAME_TYPE' | 'SPECIFIC_TYPE';
 type GenderPref = 'any' | 'same' | 'opposite';
 type AnatomyPref = 0 | 1 | 2;
+type PolygamyMode = 0 | 1 | 2 | 3;
+type RelativeRole = 0 | 1 | 2 | 3 | 4 | 5;
 
 type DropdownOption<T extends string | number> = {
   value: T;
@@ -22,6 +24,9 @@ type FamilySettingsData = {
   preferredSpeciesAnatomy?: AnatomyPref;
   favoriteName?: string;
   age?: string;
+  polygamyMode?: PolygamyMode;
+  desiredRelativeRole?: RelativeRole;
+  allowLowStatusMarriage?: number;
 };
 
 type BackendData = {
@@ -46,6 +51,10 @@ export const FamilySettingsPanel = () => {
     useState<AnatomyPref>(0);
   const [genderPreference, setGenderPreference] = useState<GenderPref>('any');
   const [favoriteName, setFavoriteName] = useState('');
+  const [polygamyMode, setPolygamyMode] = useState<PolygamyMode>(0);
+  const [desiredRelativeRole, setDesiredRelativeRole] =
+    useState<RelativeRole>(0);
+  const [allowLowStatusMarriage, setAllowLowStatusMarriage] = useState(0);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -63,6 +72,9 @@ export const FamilySettingsPanel = () => {
     setPreferredSpeciesAnatomy(settings.preferredSpeciesAnatomy ?? 0);
     setGenderPreference(settings.genderPreference ?? 'any');
     setFavoriteName(settings.favoriteName ?? '');
+    setPolygamyMode(settings.polygamyMode ?? 0);
+    setDesiredRelativeRole(settings.desiredRelativeRole ?? 0);
+    setAllowLowStatusMarriage(settings.allowLowStatusMarriage ?? 0);
     setInitialized(true);
   }, [settings, initialized]);
 
@@ -74,9 +86,12 @@ export const FamilySettingsPanel = () => {
 
   const tooltips: Record<FamilyType, string> = {
     none: 'Ваш персонаж не будет участвовать в семейной системе.',
-    member: 'Ваш персонаж попытается попасть в существующую семью как ребенок, брат, сестра или другой родственник.',
-    parent: 'Ваш персонаж попытается попасть в семью как взрослый супруг или родитель, а при отсутствии подходящей семьи может основать новую.',
-    couple: 'Ваш персонаж попытается получить супруга или супругу среди других игроков с такой же настройкой.',
+    member:
+      'Ваш персонаж попадёт в существующую семью как ребёнок, брат или сестра. Учитываются раса, возраст, сословие и социальный статус роли. Можно уточнить через «Желаемая роль в семье».',
+    parent:
+      'Ваш персонаж попадёт в семью как взрослый супруг или родитель. Если подходящей семьи нет — может основать новую. Совместимость по расе, полу и сословию обязательна.',
+    couple:
+      'Ваш персонаж будет ждать подходящего партнёра среди других игроков с настройкой «Супружеская пара». Проверяются раса, анатомия, пол, сословие и социальный статус.',
   };
 
   const familyTypeOptions: DropdownOption<FamilyType>[] = isAdult
@@ -110,6 +125,22 @@ export const FamilySettingsPanel = () => {
     { value: 2, displayText: 'Женская анатомия' },
   ];
 
+  const polygamyOptions: DropdownOption<PolygamyMode>[] = [
+    { value: 0, displayText: 'Отключено' },
+    { value: 1, displayText: 'Несколько супругов' },
+    { value: 2, displayText: 'Быть вторым супругом' },
+    { value: 3, displayText: 'Обе опции' },
+  ];
+
+  const relativeRoleOptions: DropdownOption<RelativeRole>[] = [
+    { value: 0, displayText: 'Любая роль' },
+    { value: 1, displayText: 'Брат / сестра' },
+    { value: 2, displayText: 'Родитель' },
+    { value: 3, displayText: 'Ребёнок' },
+    { value: 4, displayText: 'Дядя / тётя' },
+    { value: 5, displayText: 'Супруг / супруга' },
+  ];
+
   const getDisplayText = <T extends string | number>(
     options: DropdownOption<T>[],
     value: T | null | undefined
@@ -124,7 +155,7 @@ export const FamilySettingsPanel = () => {
   };
 
   return (
-    <Window title="Настройка семьи" width={600} height={660}>
+    <Window title="Настройка семьи" width={600} height={880}>
       <Window.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
@@ -281,6 +312,91 @@ export const FamilySettingsPanel = () => {
                 />
               </Stack.Item>
 
+              {familyType === 'member' && (
+                <Stack.Item>
+                  <Box style={{ marginBottom: '4px' }}>
+                    Желаемая роль в семье:
+                  </Box>
+
+                  <Dropdown
+                    options={relativeRoleOptions.map((opt) => opt.displayText)}
+                    selected={getDisplayText(
+                      relativeRoleOptions,
+                      desiredRelativeRole
+                    )}
+                    onSelected={(selectedText) => {
+                      const selectedOption = relativeRoleOptions.find(
+                        (opt) => opt.displayText === selectedText
+                      );
+                      if (selectedOption) {
+                        setDesiredRelativeRole(selectedOption.value);
+                      }
+                    }}
+                    width="100%"
+                  />
+
+                  <Box
+                    style={{
+                      marginTop: '4px',
+                      fontSize: '12px',
+                      color: '#aaa',
+                      fontStyle: 'italic',
+                      paddingLeft: '4px',
+                    }}>
+                    Система попытается подобрать вам именно эту роль в семье.
+                    Если не получится — будет использован стандартный алгоритм.
+                  </Box>
+                </Stack.Item>
+              )}
+
+              {(familyType === 'couple' || familyType === 'parent') && (
+                <Stack.Item>
+                  <Box style={{ marginBottom: '4px' }}>Многобрачие:</Box>
+
+                  <Dropdown
+                    options={polygamyOptions.map((opt) => opt.displayText)}
+                    selected={getDisplayText(polygamyOptions, polygamyMode)}
+                    onSelected={(selectedText) => {
+                      const selectedOption = polygamyOptions.find(
+                        (opt) => opt.displayText === selectedText
+                      );
+                      if (selectedOption) {
+                        setPolygamyMode(selectedOption.value);
+                      }
+                    }}
+                    width="100%"
+                  />
+                </Stack.Item>
+              )}
+
+              <Stack.Item>
+                <Button
+                  fluid
+                  selected={allowLowStatusMarriage === 1}
+                  color={allowLowStatusMarriage === 1 ? 'average' : undefined}
+                  onClick={() =>
+                    setAllowLowStatusMarriage(
+                      allowLowStatusMarriage === 1 ? 0 : 1
+                    )
+                  }>
+                  {allowLowStatusMarriage === 1
+                    ? 'Брак с низким статусом: разрешён'
+                    : 'Брак с низким статусом: запрещён'}
+                </Button>
+
+                <Box
+                  style={{
+                    marginTop: '4px',
+                    fontSize: '12px',
+                    color: '#aaa',
+                    fontStyle: 'italic',
+                    paddingLeft: '4px',
+                  }}>
+                  Персонажи с высоким социальным статусом не могут вступать в
+                  брак с низким статусом в любом случае.
+                </Box>
+              </Stack.Item>
+
               <Stack.Item>
                 <Input
                   placeholder="Имя фаворита"
@@ -304,6 +420,9 @@ export const FamilySettingsPanel = () => {
                   preferredSpeciesAnatomy,
                   genderPreference,
                   favoriteName,
+                  polygamyMode,
+                  desiredRelativeRole,
+                  allowLowStatusMarriage,
                 });
               }}>
               Сохранить настройки

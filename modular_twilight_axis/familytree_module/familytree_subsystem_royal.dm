@@ -25,15 +25,15 @@
 
 /datum/controller/subsystem/familytree/proc/get_royal_partner_mode_from_preferences(datum/preferences/P)
 	if(!P)
-		return "closed"
+		return "consort"
 
 	switch(P.family)
-		if(FAMILY_NEWLYWED)
+		if(FAMILY_NEWLYWED, FAMILY_NONE)
 			return "consort"
 		if(FAMILY_PARTIAL, FAMILY_FULL)
 			return "suitor"
 
-	return "closed"
+	return "consort"
 
 /datum/controller/subsystem/familytree/proc/get_preference_species_type_list(datum/preferences/P) as /list
 	var/list/result = list()
@@ -281,7 +281,7 @@
 	if(!istext(required_name) || !length(required_name))
 		return TRUE
 
-	return P.real_name == required_name
+	return familytree_names_match(P.real_name, required_name)
 
 /datum/controller/subsystem/familytree/proc/royal_partner_candidate_allowed(client/C, role_or_job)
 	if(!C?.prefs || !current_royal_partner_owner || !current_royal_partner_snapshot.len)

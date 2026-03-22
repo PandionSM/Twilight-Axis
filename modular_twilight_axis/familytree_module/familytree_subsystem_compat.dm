@@ -1,3 +1,26 @@
+// Title prefixes that may be prepended to real_name
+GLOBAL_LIST_INIT(familytree_title_prefixes, list(
+	"Lord ", "Lady ", "Ser ", "Dame ",
+	"Sir ", "Brother ", "Sister ",
+	"Father ", "Mother ",
+	"King ", "Queen ", "Prince ", "Princess ",
+))
+
+/proc/familytree_strip_title(name)
+	if(!istext(name) || !length(name))
+		return name
+	for(var/prefix in GLOB.familytree_title_prefixes)
+		if(findtext(name, prefix, 1, length(prefix) + 1))
+			return copytext(name, length(prefix) + 1)
+	return name
+
+/proc/familytree_names_match(name_a, name_b)
+	if(!istext(name_a) || !istext(name_b))
+		return FALSE
+	if(name_a == name_b)
+		return TRUE
+	return familytree_strip_title(name_a) == familytree_strip_title(name_b)
+
 /proc/pronoun_preference_matches(preference, same_pronouns)
 	if(!preference)
 		preference = ANY_GENDER
@@ -28,6 +51,9 @@
 /datum/controller/subsystem/familytree/proc/GetSpeciesCompatibilityFailureReason(mob/living/carbon/human/A, mob/living/carbon/human/B)
 	if(!A || !B)
 		return "missing mob"
+
+	if(xylix_roulette_active)
+		return null
 
 	var/datum/preferences/PA = A.client?.prefs
 	var/datum/preferences/PB = B.client?.prefs

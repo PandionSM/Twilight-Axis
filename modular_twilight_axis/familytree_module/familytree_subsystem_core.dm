@@ -6,26 +6,26 @@ SUBSYSTEM_DEF(familytree)
 	var/datum/heritage/ruling_family
 	var/list/families = list()
 	var/list/viable_spouses = list()
-	var/list/excluded_jobs = list(
-		"Wretch",
-		"Bandit",
-		"Absolver",
-		"Orthodoxist",
-		"Inquisitor",
+	var/list/banned_species_types = list(
+		/datum/species/goblinp,
+		/datum/species/gnoll,
+		/datum/species/construct,
 		)
-	var/list/nomarry_jobs = list(
-		"Nightswain",
-		"Churchling",
-		"Acolyte",
-		"Templar",
-		"Martyr",
-		"Priest",
+	var/list/banned_antag_types = list(
+		/datum/antagonist/zombie,
+		/datum/antagonist/skeleton,
+		/datum/antagonist/lich,
+		/datum/antagonist/werewolf,
+		/datum/antagonist/unbound_death_knight,
 		)
 	var/list/preset_family_species = list()
 	var/list/royal_partner_job_baselines = list()
 	var/mob/living/carbon/human/current_royal_partner_owner
 	var/current_royal_partner_mode = "closed"
 	var/list/current_royal_partner_snapshot = list()
+
+	var/list/intimacy_pairs = list()
+	var/xylix_roulette_active = FALSE
 
 /datum/controller/subsystem/familytree/Initialize()
 	ruling_family = new /datum/heritage(null, "Royal", /datum/species/human/northern)
@@ -37,6 +37,8 @@ SUBSYSTEM_DEF(familytree)
 			var/datum/heritage/family = new /datum/heritage
 			family.dominant_race = pioneer_household
 			families += family
+	check_xylix_roulette()
+	load_enigma_roles()
 	RegisterSignal(SSdcs, COMSIG_GLOB_MOB_CREATED, PROC_REF(on_mob_created))
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		register_human(H)
@@ -44,6 +46,15 @@ SUBSYSTEM_DEF(familytree)
 
 /datum/controller/subsystem/familytree/proc/build_preset_family_species() as /list
 	. = familytree_module_get_selectable_species_types()
+
+/datum/controller/subsystem/familytree/proc/check_xylix_roulette()
+	var/datum/storyteller/current = SSgamemode?.current_storyteller
+	if(!current)
+		return FALSE
+	if(!istype(current, /datum/storyteller/xylix))
+		return FALSE
+	xylix_roulette_active = TRUE
+	return TRUE
 
 /datum/controller/subsystem/familytree/proc/on_mob_created(datum/controller/subsystem/processing/dcs/source, mob/new_mob)
 	SIGNAL_HANDLER
@@ -62,12 +73,13 @@ SUBSYSTEM_DEF(familytree)
 	RegisterSignal(H, COMSIG_MOB_DEATH, PROC_REF(on_human_death))
 	RegisterSignal(H, COMSIG_LIVING_REVIVE, PROC_REF(on_human_revive))
 	RegisterSignal(H, COMSIG_JOB_RECEIVED, PROC_REF(on_human_job_received))
+	RegisterSignal(H, COMSIG_SEX_CLIMAX, PROC_REF(on_human_climax))
 
 /datum/controller/subsystem/familytree/proc/stop_tracking_human(mob/living/carbon/human/H, reason = "unspecified")
 	if(!H || !H.familytree_module_signal_bound)
 		return
 	H.familytree_module_signal_bound = FALSE
-	UnregisterSignal(H, list(COMSIG_MOB_LOGIN, COMSIG_MOB_LOGOUT, COMSIG_MOB_DEATH, COMSIG_LIVING_REVIVE, COMSIG_JOB_RECEIVED))
+	UnregisterSignal(H, list(COMSIG_MOB_LOGIN, COMSIG_MOB_LOGOUT, COMSIG_MOB_DEATH, COMSIG_LIVING_REVIVE, COMSIG_JOB_RECEIVED, COMSIG_SEX_CLIMAX))
 
 /datum/controller/subsystem/familytree/proc/on_human_login(mob/living/carbon/human/H)
 	SIGNAL_HANDLER
@@ -99,6 +111,10 @@ SUBSYSTEM_DEF(familytree)
 /datum/controller/subsystem/familytree/proc/on_human_job_received(mob/living/carbon/human/H, rank)
 	SIGNAL_HANDLER
 	try_queue_assignment(H)
+
+/datum/controller/subsystem/familytree/proc/on_human_climax(mob/living/carbon/human/H)
+	SIGNAL_HANDLER
+	on_intimacy_event(H)
 
 /datum/controller/subsystem/familytree/proc/try_queue_assignment(mob/living/carbon/human/H)
 	if(!H || QDELETED(H) || istype(H, /mob/living/carbon/human/dummy))
@@ -135,6 +151,9 @@ SUBSYSTEM_DEF(familytree)
 	H.familytree_pref = P.family
 	H.gender_choice_pref = P.gender_choice_pref
 	H.setspouse = P.setspouse
+	H.polygamy_mode = P.polygamy_mode
+	H.desired_relative_role = P.desired_relative_role
+	H.allow_low_status_marriage = P.allow_low_status_marriage
 	if(is_royal_suitor_job(job))
 		stop_tracking_human(H, "royal suitor bypasses familytree assignment")
 		return

@@ -16,13 +16,21 @@
 	if(is_royal_suitor_job(get_familytree_job(H)))
 		stop_tracking_human(H, "local assignment skipped; suitor job")
 		return
-	if(is_human_job_in_list(H, excluded_jobs))
-		stop_tracking_human(H, "local assignment skipped; excluded job")
-		return
-	if(is_human_job_in_list(H, nomarry_jobs))
-		if(status != FAMILY_NONE)
-			AssignToHouse(H)
-			stop_tracking_human(H, H.family_datum ? "assigned to house through nomarry job flow" : "nomarry job flow completed without family")
+
+	if(H.setspouse && length(H.setspouse))
+		var/favorite_result = TryAssignToFavorite(H, status)
+		if(favorite_result == "assigned")
+			stop_tracking_human(H, "assigned via favorite")
+			return
+		if(favorite_result == "waiting")
+			H.familytree_assignment_scheduled = TRUE
+			addtimer(CALLBACK(src, PROC_REF(run_local_assignment), H, status), 60 SECONDS)
+			return
+
+	if(H.desired_relative_role != RELATIVE_ANY)
+		AssignWithDesiredRole(H)
+		if(H.family_datum || H.spouse_mob)
+			stop_tracking_human(H, "assigned via desired relative role")
 			return
 	switch(status)
 		if(FAMILY_PARTIAL)
@@ -41,6 +49,71 @@
 			AssignToFamily(H)
 			stop_tracking_human(H, H.family_datum ? "assigned to family" : "family assignment completed without family")
 
+#define FAVORITE_SEARCH_TIMEOUT (30 MINUTES)
+
+/datum/controller/subsystem/familytree/proc/TryAssignToFavorite(mob/living/carbon/human/H, status)
+	if(!H?.setspouse || !length(H.setspouse))
+		return "skip"
+
+	if(!H.familytree_favorite_search_start)
+		H.familytree_favorite_search_start = world.time
+
+	if(world.time - H.familytree_favorite_search_start >= FAVORITE_SEARCH_TIMEOUT)
+		H.setspouse = ""
+		H.familytree_favorite_search_start = 0
+		return "skip"
+
+	var/mob/living/carbon/human/favorite = FindFavoriteMob(H)
+	if(!favorite)
+		return "waiting"
+
+	if(favorite.setspouse && length(favorite.setspouse))
+		if(!familytree_names_match(favorite.setspouse, H.real_name))
+			return "waiting"
+
+	if(favorite.family_datum)
+		var/datum/heritage/house = favorite.family_datum
+		house.AddToFamily(H, favorite.family_member_datum, null, FALSE)
+		if(status == FAMILY_NEWLYWED || status == FAMILY_FULL)
+			if(H.family_member_datum && favorite.family_member_datum)
+				house.MarryMembers(H.family_member_datum, favorite.family_member_datum)
+		return "assigned"
+
+	if(status == FAMILY_NEWLYWED || status == FAMILY_FULL)
+		H.MarryTo(favorite)
+		viable_spouses -= favorite
+		viable_spouses -= H
+		return "assigned"
+
+	return "waiting"
+
+/datum/controller/subsystem/familytree/proc/FindFavoriteMob(mob/living/carbon/human/H)
+	if(!H?.setspouse)
+		return null
+
+	for(var/datum/heritage/house as anything in families)
+		for(var/datum/family_member/member as anything in house.members)
+			if(member.person && familytree_names_match(member.person.real_name, H.setspouse))
+				return member.person
+
+	for(var/mob/living/carbon/human/candidate as anything in viable_spouses)
+		if(candidate == H)
+			continue
+		if(familytree_names_match(candidate.real_name, H.setspouse))
+			return candidate
+
+	for(var/mob/living/carbon/human/candidate in GLOB.alive_mob_list)
+		if(candidate == H)
+			continue
+		if(!candidate.client || candidate.stat == DEAD)
+			continue
+		if(familytree_names_match(candidate.real_name, H.setspouse))
+			return candidate
+
+	return null
+
+#undef FAVORITE_SEARCH_TIMEOUT
+
 /datum/controller/subsystem/familytree/proc/AssignToHouse(mob/living/carbon/human/H)
 	if(!H)
 		return
@@ -50,14 +123,6 @@
 	var/datum/heritage/chosen_house
 	var/list/low_priority_houses = list()
 	var/list/high_priority_houses = list()
-
-	if(H.setspouse)
-		for(var/datum/heritage/house as anything in families)
-			for(var/datum/family_member/M as anything in house.members)
-				if(M.person && M.person.real_name == H.setspouse)
-					if(!SpeciesCompatible(H, M.person))
-						continue
-					chosen_house = house
 
 	for(var/datum/heritage/house as anything in families)
 		if(house.housename && house.members.len >= 1 && house.members.len < 6)
@@ -163,23 +228,20 @@
 		var/has_single_adult = FALSE
 		for(var/datum/family_member/member as anything in house.members)
 			if(member.person && !member.spouses.len)
-				if(H.setspouse && member.person.real_name == H.setspouse)
-					eligible_houses.Insert(1, house)
+				if(!member.person.setspouse || familytree_names_match(member.person.setspouse, H.real_name))
+					if(!pronouns_compatible(H, member.person))
+						continue
+					if(GetSpeciesCompatibilityFailureReason(H, member.person))
+						continue
+					if(!familytree_estates_compatible(H, member.person))
+						continue
+					if(!familytree_role_tiers_compatible(H, member.person))
+						continue
+					if(member.person.familytree_pref == FAMILY_PARTIAL)
+						continue
 					has_single_adult = TRUE
+					eligible_houses += house
 					break
-				else if(!H.setspouse)
-					if(!member.person.setspouse || member.person.setspouse == H.real_name)
-						if(!pronouns_compatible(H, member.person))
-							continue
-						if(GetSpeciesCompatibilityFailureReason(H, member.person))
-							continue
-						if(member.person.familytree_pref == FAMILY_PARTIAL)
-							continue
-						if(is_human_job_in_list(member.person, nomarry_jobs))
-							continue
-						has_single_adult = TRUE
-						eligible_houses += house
-						break
 
 		if(!has_single_adult && !house.housename)
 			eligible_houses += house
@@ -190,19 +252,12 @@
 	for(var/datum/heritage/house as anything in eligible_houses)
 		for(var/datum/family_member/member as anything in house.members)
 			if(member.person && !member.spouses.len)
-				var/compatible = FALSE
-				if(H.setspouse && member.person.real_name == H.setspouse)
-					compatible = TRUE
-				else if(!H.setspouse)
-					if(!member.person.setspouse || member.person.setspouse == H.real_name)
-						if(pronouns_compatible(H, member.person) && SpeciesCompatible(H, member.person))
-							compatible = TRUE
-
-				if(compatible)
-					var/datum/family_member/new_member = house.CreateFamilyMember(H)
-					if(new_member)
-						house.MarryMembers(new_member, member)
-						return
+				if(!member.person.setspouse || familytree_names_match(member.person.setspouse, H.real_name))
+					if(pronouns_compatible(H, member.person) && SpeciesCompatible(H, member.person) && familytree_estates_compatible(H, member.person) && familytree_role_tiers_compatible(H, member.person))
+						var/datum/family_member/new_member = house.CreateFamilyMember(H)
+						if(new_member)
+							house.MarryMembers(new_member, member)
+							return
 
 		if(!house.housename)
 			var/datum/family_member/new_member = house.CreateFamilyMember(H)
@@ -228,6 +283,7 @@
 		return
 	if(!(H in viable_spouses))
 		viable_spouses += H
+
 	var/list/potential_matches = list()
 
 	for(var/mob/living/carbon/human/potential_spouse as anything in viable_spouses)
@@ -245,22 +301,21 @@
 		if(potential_block_reason)
 			unsubscribe_familytree_human(potential_spouse, "removed from newlywed pool: [potential_block_reason]")
 			continue
-		var/mutual_setspouse = (H.setspouse == potential_spouse.real_name) && (potential_spouse.setspouse == H.real_name)
-		if(!mutual_setspouse)
-			if(!pronouns_compatible(H, potential_spouse))
-				continue
-			var/species_failure_reason = GetSpeciesCompatibilityFailureReason(H, potential_spouse)
-			if(species_failure_reason)
+		if(!pronouns_compatible(H, potential_spouse))
+			continue
+		var/species_failure_reason = GetSpeciesCompatibilityFailureReason(H, potential_spouse)
+		if(species_failure_reason)
+			continue
+		if(!familytree_estates_compatible(H, potential_spouse))
+			continue
+		if(!familytree_role_tiers_compatible(H, potential_spouse))
+			continue
+		if(potential_spouse.setspouse && length(potential_spouse.setspouse))
+			if(!familytree_names_match(potential_spouse.setspouse, H.real_name))
 				continue
 		var/priority = 0
-		if(mutual_setspouse)
-			priority = 3
-		else if(potential_spouse.setspouse == H.real_name)
+		if(familytree_names_match(potential_spouse.setspouse, H.real_name))
 			priority = 1
-		else if(!H.setspouse && !potential_spouse.setspouse)
-			priority = 0
-		else
-			continue
 
 		potential_matches += list(list(potential_spouse, priority))
 

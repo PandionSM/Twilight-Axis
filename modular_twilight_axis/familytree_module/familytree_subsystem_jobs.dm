@@ -39,13 +39,22 @@
 
 	return resolve_job_datum(H.job)
 
-/datum/controller/subsystem/familytree/proc/is_familytree_antagonist(mob/living/carbon/human/H)
+/datum/controller/subsystem/familytree/proc/is_banned_species(mob/living/carbon/human/H)
+	if(!H?.dna?.species)
+		return FALSE
+	for(var/species_type in banned_species_types)
+		if(istype(H.dna.species, species_type))
+			return TRUE
+	return FALSE
+
+/datum/controller/subsystem/familytree/proc/is_banned_antag(mob/living/carbon/human/H)
 	var/datum/mind/mind = H?.mind
 	if(!mind)
 		return FALSE
-	if(mind.special_role)
-		return TRUE
-	return !!mind.has_antag_datum(/datum/antagonist)
+	for(var/antag_type in banned_antag_types)
+		if(mind.has_antag_datum(antag_type))
+			return TRUE
+	return FALSE
 
 /datum/controller/subsystem/familytree/proc/is_familytree_wildshape(mob/living/carbon/human/H)
 	return istype(H, /mob/living/carbon/human/species/wildshape)
@@ -59,8 +68,10 @@
 		return "dummy mob"
 	if(is_familytree_wildshape(H))
 		return "wildshape form"
-	if(is_familytree_antagonist(H))
-		return "antagonist"
+	if(is_banned_species(H))
+		return "banned species"
+	if(is_banned_antag(H))
+		return "banned antag"
 	return null
 
 /datum/controller/subsystem/familytree/proc/get_familytree_runtime_block_reason(mob/living/carbon/human/H, require_client = FALSE)
@@ -85,6 +96,22 @@
 	viable_spouses -= H
 	H.familytree_assignment_scheduled = FALSE
 	stop_tracking_human(H, reason)
+
+/datum/controller/subsystem/familytree/proc/is_job_of_type(datum/job/job, list/type_list)
+	if(!job || !type_list)
+		return FALSE
+	for(var/job_type in type_list)
+		if(istype(job, job_type))
+			return TRUE
+	return FALSE
+
+/datum/controller/subsystem/familytree/proc/is_human_job_of_type(mob/living/carbon/human/H, list/type_list)
+	if(!H || !type_list)
+		return FALSE
+	var/datum/job/job = get_familytree_job(H)
+	if(!job)
+		return FALSE
+	return is_job_of_type(job, type_list)
 
 /datum/controller/subsystem/familytree/proc/is_human_job_in_list(mob/living/carbon/human/H, list/title_list)
 	if(!H || !title_list)
@@ -156,14 +183,12 @@
 /datum/controller/subsystem/familytree/proc/CanBeParentOf(mob/living/carbon/human/parent, mob/living/carbon/human/child)
 	var/parent_age = parent.age
 	var/child_age = child.age
-	if(!child.setspouse || child.setspouse == parent.real_name)
-		if(parent_age == AGE_ADULT)
-			return FALSE
-		if(parent_age == AGE_MIDDLEAGED && child_age == AGE_ADULT)
-			return TRUE
-		if(parent_age == AGE_OLD && child_age != AGE_OLD)
-			return TRUE
-
+	if(parent_age == AGE_ADULT)
+		return FALSE
+	if(parent_age == AGE_MIDDLEAGED && child_age == AGE_ADULT)
+		return TRUE
+	if(parent_age == AGE_OLD && child_age != AGE_OLD)
+		return TRUE
 	return FALSE
 
 /datum/controller/subsystem/familytree/proc/CanBeSiblings(age1, age2)
@@ -208,7 +233,16 @@
 		if(member.person && CanBeSiblings(member.person.age, person.age))
 			return "sibling"
 
-	return "parent"
+	var/can_parent_someone = FALSE
+	for(var/datum/family_member/member as anything in house.members)
+		if(member.person && CanBeParentOf(person, member.person))
+			can_parent_someone = TRUE
+			break
+
+	if(can_parent_someone)
+		return "parent"
+
+	return "sibling"
 
 /datum/controller/subsystem/familytree/proc/ValidateAllFamilies()
 	if(ruling_family && ruling_family.members.len)

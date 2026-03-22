@@ -47,6 +47,9 @@
 	species_preference_mode = initial(species_preference_mode)
 	preferred_species_types = list()
 	preferred_species_anatomy = initial(preferred_species_anatomy)
+	polygamy_mode = initial(polygamy_mode)
+	desired_relative_role = initial(desired_relative_role)
+	allow_low_status_marriage = initial(allow_low_status_marriage)
 
 /datum/preferences/proc/familytree_module_sanitize_character()
 	family = sanitize_integer(family, FAMILY_NONE, FAMILY_NEWLYWED, FAMILY_NONE)
@@ -86,6 +89,10 @@
 	else
 		setspouse = copytext(setspouse, 1, 65)
 
+	polygamy_mode = sanitize_integer(polygamy_mode, POLYGAMY_DISABLED, POLYGAMY_ALLOW_BOTH, POLYGAMY_DISABLED)
+	desired_relative_role = sanitize_integer(desired_relative_role, RELATIVE_ANY, RELATIVE_SPOUSE, RELATIVE_ANY)
+	allow_low_status_marriage = sanitize_integer(allow_low_status_marriage, 0, 1, 0)
+
 /datum/preferences/proc/familytree_module_has_enabled_customizer_entry(entry_type)
 	validate_customizer_entries()
 	var/datum/customizer_entry/entry = get_customizer_entry_of_type(entry_type)
@@ -114,6 +121,9 @@
 			S["species_preference_mode"] >> species_preference_mode
 			S["preferred_species_types"] >> preferred_species_types
 			S["preferred_species_anatomy"] >> preferred_species_anatomy
+			S["polygamy_mode"] >> polygamy_mode
+			S["desired_relative_role"] >> desired_relative_role
+			S["allow_low_status_marriage"] >> allow_low_status_marriage
 
 	familytree_module_sanitize_character()
 	familytree_module_loaded_slot = slot
@@ -138,6 +148,9 @@
 	WRITE_FILE(S["species_preference_mode"], species_preference_mode)
 	WRITE_FILE(S["preferred_species_types"], preferred_species_types)
 	WRITE_FILE(S["preferred_species_anatomy"], preferred_species_anatomy)
+	WRITE_FILE(S["polygamy_mode"], polygamy_mode)
+	WRITE_FILE(S["desired_relative_role"], desired_relative_role)
+	WRITE_FILE(S["allow_low_status_marriage"], allow_low_status_marriage)
 
 	familytree_module_loaded_slot = slot
 	familytree_module_loaded_path = path

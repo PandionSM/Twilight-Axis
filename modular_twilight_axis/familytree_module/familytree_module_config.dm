@@ -18,6 +18,13 @@
 // familytree_subsystem_core.dm    - SSfamilytree: init, signals, lifecycle, queue
 // familytree_subsystem_royal.dm   - royal partner jobs, lineage generation
 // familytree_subsystem_matching.dm- AssignToHouse/Family/NewlyWed matching
+// familytree_estates.dm           - estates (noble/commoner), compatibility filter
+// familytree_role_tiers.dm        - social role tiers (high/low), overlap filter
+// familytree_storytellers.dm      - storyteller influence (Astrata/Eora/Baotha/Psydon/Ravox/Noc/Dendor), karma
+// familytree_polygamy.dm          - polygamy: flags, lore checks (Baotha/drow)
+// familytree_rituals.dm           - priest wedding, adoption, vampire binding
+// familytree_relative_search.dm   - desired family role (sibling/parent/child/uncle/spouse)
+// familytree_enigma.dm        - DLC: enigma roles integration into tier system
 //
 // TGUI: tgui/packages/tgui/interfaces/FamilySettingsPanel.tsx
 //       tgui/packages/tgui/interfaces/FamilyDisplayPanel.tsx
@@ -50,6 +57,18 @@
 #define FAMILY_OMMER "Parents Sibling"
 #define FAMILY_INLAW "In Law"
 
+#define POLYGAMY_DISABLED 0
+#define POLYGAMY_ALLOW_MULTIPLE 1
+#define POLYGAMY_ALLOW_BE_SECOND 2
+#define POLYGAMY_ALLOW_BOTH 3
+
+#define RELATIVE_ANY 0
+#define RELATIVE_SIBLING 1
+#define RELATIVE_PARENT 2
+#define RELATIVE_CHILD 3
+#define RELATIVE_UNCLE_AUNT 4
+#define RELATIVE_SPOUSE 5
+
 #include "familytree_vars.dm"
 #include "familytree_prefs.dm"
 #include "familytree_mob_procs.dm"
@@ -66,3 +85,10 @@
 #include "familytree_subsystem_core.dm"
 #include "familytree_subsystem_royal.dm"
 #include "familytree_subsystem_matching.dm"
+#include "familytree_estates.dm"
+#include "familytree_role_tiers.dm"
+#include "familytree_storytellers.dm"
+#include "familytree_polygamy.dm"
+#include "familytree_rituals.dm"
+#include "familytree_relative_search.dm"
+#include "familytree_enigma.dm"

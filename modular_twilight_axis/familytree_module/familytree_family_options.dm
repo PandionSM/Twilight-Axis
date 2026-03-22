@@ -28,7 +28,10 @@
 		"preferredSpeciesTypes" = islist(P.preferred_species_types) ? P.preferred_species_types.Copy() : list(),
 		"preferredSpeciesAnatomy" = P.preferred_species_anatomy,
 		"favoriteName" = istext(P.setspouse) ? P.setspouse : "",
-		"age" = P.age
+		"age" = P.age,
+		"polygamyMode" = P.polygamy_mode,
+		"desiredRelativeRole" = P.desired_relative_role,
+		"allowLowStatusMarriage" = P.allow_low_status_marriage
 	)
 
 	var/list/species_names = list()
@@ -69,6 +72,9 @@
 			P.preferred_species_types = new_species_types
 			P.preferred_species_anatomy = text2num("[params["preferredSpeciesAnatomy"]]")
 			P.setspouse = istext(params["favoriteName"]) ? params["favoriteName"] : ""
+			P.polygamy_mode = text2num("[params["polygamyMode"]]")
+			P.desired_relative_role = text2num("[params["desiredRelativeRole"]]")
+			P.allow_low_status_marriage = text2num("[params["allowLowStatusMarriage"]]")
 
 			P.familytree_module_sanitize_character()
 			P.familytree_module_save_character()

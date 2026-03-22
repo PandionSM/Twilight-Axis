@@ -82,6 +82,10 @@
 			return "masculine"
 		if(SHE_HER)
 			return "feminine"
+		if(THEY_THEM)
+			return "neutral"
+		if(IT_ITS)
+			return "neuter"
 
 	switch(gender)
 		if(MALE)

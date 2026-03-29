@@ -94,26 +94,48 @@ GLOBAL_VAR_INIT(alchemy_index_initialized, FALSE)
 	var/list/used_signatures = list()
 
 	for(var/path in advanced_potions)
+		var/datum/alch_cauldron_recipe/advanced/R = path
+		var/req_skill = initial(R.skill_required)
 		
 		var/list/recipe_reqs = list("strong" = list(), "medium" = list(), "light" = list())
 		var/signature = ""
-		var/attempts = 0
 		
-		while(attempts < 100)
+		var/attempts = 0
+		while(attempts < 50)
 			attempts++
 			var/list/available = all_smells.Copy()
+			recipe_reqs = list("strong" = list(), "medium" = list(), "light" = list())
+
+			if(req_skill <= SKILL_LEVEL_APPRENTICE)
+
+				if(prob(50))
+					recipe_reqs["strong"] += pick_n_take(available)
+				else
+					recipe_reqs["medium"] += pick_n_take(available)
+					recipe_reqs["light"] += pick_n_take(available)
 			
-			var/s_smell = pick_n_take(available) 
-			var/m_smell = pick_n_take(available) 
-			var/l_smell = pick_n_take(available) 
-				
-			signature = "[s_smell]-[m_smell]-[l_smell]"
+			else if(req_skill <= SKILL_LEVEL_JOURNEYMAN)
+				if(prob(50))
+					recipe_reqs["strong"] += pick_n_take(available)
+					recipe_reqs["light"] += pick_n_take(available)
+				else
+					recipe_reqs["strong"] += pick_n_take(available)
+					recipe_reqs["medium"] += pick_n_take(available)
+			
+			else
+
+				if(prob(50))
+					recipe_reqs["strong"] += pick_n_take(available)
+					recipe_reqs["medium"] += pick_n_take(available)
+					recipe_reqs["light"] += pick_n_take(available)
+				else
+					recipe_reqs["strong"] += pick_n_take(available)
+					recipe_reqs["strong"] += pick_n_take(available)
+
+			signature = "[list2params(recipe_reqs["strong"])]|[list2params(recipe_reqs["medium"])]|[list2params(recipe_reqs["light"])]"
 			
 			if(!(signature in used_signatures))
 				used_signatures += signature
-				recipe_reqs["strong"] += s_smell
-				recipe_reqs["medium"] += m_smell
-				recipe_reqs["light"] += l_smell
 				break
 				
 		round_recipes[path] = recipe_reqs

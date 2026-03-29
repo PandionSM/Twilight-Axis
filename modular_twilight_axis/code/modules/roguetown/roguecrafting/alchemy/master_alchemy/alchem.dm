@@ -264,16 +264,32 @@
 		
 		if(is_discovered || has_hint)
 			var/list/reqs = GLOB.alchemy_dynamic_manager.round_recipes[path]
-			var/list/ui_reqs = list("strong" = null, "medium" = null, "light" = null)
+			
+			var/list/ui_reqs = list(
+				"strong" = list(),
+				"medium" = list(),
+				"light" = list()
+			)
 			
 			if(is_discovered)
-				if(length(reqs["strong"])) ui_reqs["strong"] = reqs["strong"][1]
-				if(length(reqs["medium"])) ui_reqs["medium"] = reqs["medium"][1]
-				if(length(reqs["light"]))  ui_reqs["light"]  = reqs["light"][1]
+				ui_reqs["strong"] = reqs["strong"]
+				ui_reqs["medium"] = reqs["medium"]
+				ui_reqs["light"] = reqs["light"]
 			else if(has_hint)
-				if(length(reqs["strong"])) ui_reqs["strong"] = reqs["strong"][1]
-				if(length(reqs["medium"])) ui_reqs["medium"] = "???"
-				if(length(reqs["light"]))  ui_reqs["light"]  = "???"
+
+				if(length(reqs["strong"]))
+					ui_reqs["strong"] += reqs["strong"][1]
+					if(length(reqs["strong"]) > 1)
+						for(var/i in 2 to length(reqs["strong"]))
+							ui_reqs["strong"] += "???"
+				
+				if(length(reqs["medium"]))
+					for(var/i in 1 to length(reqs["medium"]))
+						ui_reqs["medium"] += "???"
+
+				if(length(reqs["light"]))
+					for(var/i in 1 to length(reqs["light"]))
+						ui_reqs["light"] += "???"
 
 			knowledge += list(list(
 				"name" = initial(R.name),
@@ -523,8 +539,10 @@
 			var/atom/out_type = R_DATA["result_type"]
 
 			if(transmute_slot && out_type)
+				if(STR)
+					STR.remove_from_storage(transmute_slot, null)
 				PS.charges -= cost
-				qdel(transmute_slot)
+				qdel(transmute_slot)   
 				transmute_slot = null
 				new out_type(get_turf(src))
 				

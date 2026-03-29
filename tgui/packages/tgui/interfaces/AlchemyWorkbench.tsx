@@ -35,7 +35,11 @@ type Recipe = {
   found: BooleanLike;
   is_hint: BooleanLike;
   type: 'infusion' | 'grid';
-  reqs?: { strong: string; medium: string; light: string };
+  reqs?: {
+    strong: (string | null)[];
+    medium: (string | null)[];
+    light: (string | null)[];
+  };
   grid_icons?: (string | null)[];
   result_img?: string;
 };
@@ -373,23 +377,22 @@ const RequirementBox = ({ tier, smell }: { tier: string, smell: string | null })
   );
 };
 
-const InfusionRequirements = ({ reqs }: { reqs: any }) => (
-  <Stack align="center">
-    <RequirementBox tier="strong" smell={reqs.strong} />
-    {reqs.medium && (
-      <>
-        <Box mx={0.5} color="gray" bold>+</Box>
-        <RequirementBox tier="medium" smell={reqs.medium} />
-      </>
-    )}
-    {reqs.light && (
-      <>
-        <Box mx={0.5} color="gray" bold>+</Box>
-        <RequirementBox tier="light" smell={reqs.light} />
-      </>
-    )}
-  </Stack>
-);
+const InfusionRequirements = ({ reqs }: { reqs: any }) => {
+  const elements: React.ReactNode[] = [];
+
+  ['strong', 'medium', 'light'].forEach((tier) => {
+    if (reqs[tier] && reqs[tier].length > 0) {
+      reqs[tier].forEach((smell) => {
+        if (elements.length > 0) {
+          elements.push(<Box key={`plus-${elements.length}`} mx={0.5} color="gray" bold>+</Box>);
+        }
+        elements.push(<RequirementBox key={`${tier}-${smell}-${elements.length}`} tier={tier} smell={smell} />);
+      });
+    }
+  });
+
+  return <Stack align="center">{elements}</Stack>;
+};
 
 const GridPreview = ({ icons }: { icons: (string | null)[] }) => (
   <Box style={{ 

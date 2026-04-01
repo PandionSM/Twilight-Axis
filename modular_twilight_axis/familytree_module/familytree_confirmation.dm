@@ -58,9 +58,9 @@
 			handle_refusal(person_a, person_b)
 		if(result_b == CONFIRM_REJECTED || result_b == CONFIRM_TIMEOUT)
 			handle_refusal(person_b, person_a)
-		if(result_a == CONFIRM_PENDING)
+		if(result_a != CONFIRM_REJECTED && result_a != CONFIRM_TIMEOUT)
 			notify_cancelled(person_a)
-		if(result_b == CONFIRM_PENDING)
+		if(result_b != CONFIRM_REJECTED && result_b != CONFIRM_TIMEOUT)
 			notify_cancelled(person_b)
 		qdel(src)
 		return
@@ -99,10 +99,13 @@
 	check_resolution()
 
 /datum/family_confirm_session/proc/notify_cancelled(mob/living/carbon/human/person)
-	if(!person?.client)
+	if(!person || QDELETED(person))
 		return
-	SSfamilytree.ftlog("MUTUAL CONFIRM: [person.real_name] was pending when other side refused type=[confirm_type]")
-	to_chat(person, span_warning("Другая сторона отказалась от вступления в семью. Ваш запрос отменён."))
+	SSfamilytree.ftlog("MUTUAL CONFIRM: [person.real_name] cancelled (other side refused) type=[confirm_type]")
+	to_chat(person, span_warning("Другая сторона отказалась от вступления в семью. Ваш запрос отменён. Система попробует найти вам новую пару."))
+	if(!person.familytree_opted_out && !person.family_datum && !person.spouse_mob && person.familytree_pref && person.familytree_pref != FAMILY_NONE)
+		person.familytree_assignment_scheduled = TRUE
+		addtimer(CALLBACK(SSfamilytree, TYPE_PROC_REF(/datum/controller/subsystem/familytree, run_local_assignment), person, person.familytree_pref), 10 SECONDS)
 
 /datum/controller/subsystem/familytree/proc/request_family_confirmation(mob/living/carbon/human/H, datum/callback/on_accept, confirm_type = "family")
 	if(H?.familytree_opted_out)

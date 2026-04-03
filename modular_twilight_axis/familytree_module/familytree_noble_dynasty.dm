@@ -32,7 +32,13 @@
 	if(block)
 		return FALSE
 
-	ftlog("NOBLE DYNASTY: [H.real_name] eligible for ruling family")
+	if(familytree_get_role_tier(H) == ROLE_TIER_LOW)
+		ftlog("NOBLE DYNASTY: [H.real_name] blocked - low status role not allowed in ruling family")
+		return FALSE
+	if(familytree_get_role_tier(H) == ROLE_TIER_NONE && !is_royal_hand_job(get_familytree_job(H)))
+		ftlog("NOBLE DYNASTY: [H.real_name] blocked - no tier role")
+		return FALSE
+	ftlog("NOBLE DYNASTY: [H.real_name] eligible for ruling family (noble dynasty entry)")
 	request_family_confirmation(H, CALLBACK(src, PROC_REF(do_assign_noble_to_dynasty), H), "dynasty")
 	return TRUE
 

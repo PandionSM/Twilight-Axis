@@ -532,6 +532,35 @@ GLOBAL_LIST_INIT(ritual_counters, list())
 	new /obj/item/corruptedheart(center)
 	to_chat(user, span_notice("A corrupted heart. When used on a non-enlightened mortal their heart shall ache and they will be immobilized and too stunned to speak. Perfect for getting new soon-to-be enlightened. Now, just don't use it at the combat ready."))
 
+/datum/ritual/servantry/luxstol
+	name = "Кража частички души"
+	desk = "Жестокий ритуал, который отнимает частичку души жертвы."
+	center_requirement = /mob/living/carbon/human // One to be gutted.human
+	center_book = "Мертвое тело"
+
+/datum/ritual/servantry/luxstol/invoke(mob/living/user, turf/center)
+	. = ..()
+	var/mob/living/carbon/human/target = locate() in center.contents
+	if(target.mind && target.mind.has_antag_datum(/datum/antagonist/skeleton))
+		to_chat(user, span_danger("Это скелет, в нем уже не может быть частички души..."))
+		return
+	if(!target.mind)
+		to_chat(user, span_danger("Зизо отвергает это тело."))
+		return
+	if(is_zizocultist(target.mind) || is_zizolackey(target.mind))
+		to_chat(user, span_danger("Зизо не может отдать частичку души своего же последователя..."))
+		return
+	if(target.patron.type == /datum/patron/inhumen/zizo)
+		to_chat(user, span_danger("Зизо не может отдать частичку души своего же последователя..."))
+		return
+	if(target.has_status_effect(/datum/status_effect/debuff/ritualdefiled/cult))
+		to_chat(user, span_danger("Его душа уже осквернена..."))
+		return
+	target.Stun(30)
+	target.Knockdown(30)
+	target.Sleeping(60)
+	new /obj/item/reagent_containers/lux(center)
+	target.apply_status_effect(/datum/status_effect/debuff/ritualdefiled/cult)
 /obj/item/corruptedheart
 	name = "corrupted heart"
 	desc = "It sparkles with forbidden magic energy. It makes all the heart aches go away."

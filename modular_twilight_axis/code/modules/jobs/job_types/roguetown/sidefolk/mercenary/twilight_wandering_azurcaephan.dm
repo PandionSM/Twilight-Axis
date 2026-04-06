@@ -5,14 +5,13 @@
 	allowed_races = list(\
 	/datum/species/human/northern,\
 	/datum/species/aasimar,\
-	/datum/species/anthromorph,\
-	/datum/species/demihuman,\
-	/datum/species/aura,\
 	/datum/species/human/halfelf,\
 	/datum/species/elf/dark,\
 	/datum/species/elf/dark/raider,\
 	/datum/species/elf/wood,\
 	/datum/species/elf/sun,\
+	/datum/species/dwarf,\
+	/datum/species/dwarf/gnome,\
 	)
 	allowed_patrons = list(/datum/patron/inhumen/zizo, /datum/patron/divine/noc) // зизо оставлено тк слишком много наёмником ведут себя как СБухи 4.0, пускай у них будет хоть какой-то шанс наняться к антагам
 	outfit = /datum/outfit/job/roguetown/mercenary/twilight_wandering_azurcaephan

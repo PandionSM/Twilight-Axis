@@ -346,3 +346,208 @@
 			target.Knockdown(20)
 			playsound(target.loc, 'sound/combat/hits/blunt/genblunt (2).ogg', 100, TRUE)
 
+/datum/reagent/advanced/mist_form
+	name = "Vapor of the Void"
+	description = "A swirling, semi-transparent liquid that feels like it's not even there. Holding it gives a strange sensation of weightlessness."
+	reagent_state = LIQUID
+	color = "#dcdcdc"
+	alpha = 150
+	metabolization_rate = REAGENTS_METABOLISM 
+	taste_description = "butter"
+
+/datum/reagent/advanced/mist_form/on_mob_add(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.apply_status_effect(/datum/status_effect/buff/mist_form)
+	to_chat(M, span_purple("Ваше тело теряет плотность и превращается в холодный, зыбкий туман..."))
+	playsound(M.loc, 'sound/effects/hood_ignite.ogg', 50, TRUE)
+
+/datum/reagent/advanced/mist_form/on_mob_delete(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.remove_status_effect(/datum/status_effect/buff/mist_form)
+	to_chat(M, span_notice("Ваша плоть снова обретает тяжесть и форму."))
+
+/datum/status_effect/mirror_reflection
+	id = "mirror_reflection"
+	duration = 30000
+	alert_type = /atom/movable/screen/alert/status_effect/buff/alch/mirror_reflection
+
+/datum/status_effect/mirror_reflection/on_apply()
+
+	RegisterSignal(owner, COMSIG_MOB_ITEM_BEING_ATTACKED, PROC_REF(handle_mirror_item))
+	RegisterSignal(owner, COMSIG_MOB_ATTACKED_BY_HAND, PROC_REF(handle_mirror_hand))
+	RegisterSignal(owner, COMSIG_ATOM_BULLET_ACT, PROC_REF(handle_mirror_bullet))
+
+	to_chat(owner, span_purple("Ваше тело становится зеркальной гладью!"))
+	return ..()
+
+/datum/status_effect/mirror_reflection/on_remove()
+	UnregisterSignal(owner, list(COMSIG_MOB_ITEM_BEING_ATTACKED, COMSIG_MOB_ATTACKED_BY_HAND, COMSIG_ATOM_BULLET_ACT))
+	return ..()
+
+/datum/status_effect/mirror_reflection/proc/handle_mirror_item(datum/source, mob/living/victim, mob/living/attacker, obj/item/I)
+	SIGNAL_HANDLER
+	if(!attacker || attacker == victim) return
+
+	if(attacker.has_status_effect(/datum/status_effect/mirror_reflection))
+		return
+
+	spawn(0)
+		if(attacker && I && !QDELETED(attacker))
+			attacker.visible_message(span_userdanger("Удар [attacker] отражается от зеркального тела [victim] и бьет по самому [attacker]!"))
+
+			I.attack(attacker, attacker) 
+
+			victim.flash_fullscreen("whiteflash", 1)
+			var/datum/effect_system/spark_spread/S = new()
+			S.set_up(2, 1, victim.loc)
+			S.start()
+
+	return COMPONENT_ITEM_NO_ATTACK
+
+
+/datum/status_effect/mirror_reflection/proc/handle_mirror_hand(datum/source, mob/living/attacker, mob/living/victim, style)
+	SIGNAL_HANDLER
+	if(!attacker || attacker == victim) return
+	if(attacker.has_status_effect(/datum/status_effect/mirror_reflection)) return
+
+	spawn(0)
+		if(attacker && !QDELETED(attacker))
+			attacker.visible_message(span_userdanger("[attacker] бьет по зеркалу [victim] и ломает собственные руки!"))
+			attacker.apply_damage(attacker.get_punch_dmg(), BRUTE, attacker.zone_selected, forced = TRUE)
+
+	return COMPONENT_HAND_NO_ATTACK
+
+/datum/status_effect/mirror_reflection/proc/handle_mirror_bullet(datum/source, obj/projectile/P)
+	SIGNAL_HANDLER
+	if(!P || P.firer == owner) return
+
+	spawn(0)
+		if(P && owner)
+			owner.visible_message(span_userdanger("Снаряд [P.name] отскакивает от зеркальной кожи [owner]!"))
+			P.reflect_back(owner)
+
+	return COMPONENT_ATOM_BLOCK_BULLET
+
+/atom/movable/screen/alert/status_effect/buff/alch/mirror_reflection
+	name = "Зеркальное Отражение"
+	desc = "Вы абсолютно неуязвимы к физическим атакам. Любой удар перенаправляется на врага."
+	icon_state = "buff"
+
+
+/datum/reagent/advanced/mirror_potion
+	name = "Liquid Reflection"
+	description = "A shimmering, silver liquid that perfectly reflects everything around it."
+	reagent_state = LIQUID
+	color = "#E5E4E2"
+	metabolization_rate = REAGENTS_METABOLISM * 1.5
+	taste_description = "cream"
+
+/datum/reagent/advanced/mirror_potion/on_mob_add(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.apply_status_effect(/datum/status_effect/mirror_reflection)
+
+/datum/reagent/advanced/mirror_potion/on_mob_delete(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.remove_status_effect(/datum/status_effect/mirror_reflection)
+
+/datum/reagent/advanced/levitation
+	name = "Aether Essence"
+	description = "A cloud-like, swirling gas trapped in liquid form. It is so light that the bottle almost floats out of your hand."
+	reagent_state = LIQUID
+	color = "#add8e6"
+	metabolization_rate = REAGENTS_METABOLISM * 0.5
+	taste_description = "cloud"
+
+/datum/reagent/advanced/levitation/on_mob_add(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.apply_status_effect(/datum/status_effect/levitation)
+
+/datum/reagent/advanced/levitation/on_mob_delete(mob/living/carbon/human/M)
+	if(!istype(M)) return
+	M.remove_status_effect(/datum/status_effect/levitation)
+
+/datum/status_effect/levitation
+	id = "levitation"
+	duration = 6000
+	alert_type = /atom/movable/screen/alert/status_effect
+
+/datum/status_effect/levitation/on_apply()
+	if(!ishuman(owner)) return FALSE
+	var/mob/living/carbon/human/H = owner
+	
+	H.movement_type |= FLYING
+	H.verbs += list(/mob/living/carbon/human/proc/levitation_up, /mob/living/carbon/human/proc/levitation_down)
+	
+	to_chat(H, span_purple("Ваше тело теряет плотность, вы плавно отрываетесь от земли..."))
+	
+	addtimer(CALLBACK(src, PROC_REF(start_float_animation), H), 3)
+	
+	return ..()
+
+/datum/status_effect/levitation/on_remove()
+	if(!ishuman(owner)) return
+	var/mob/living/carbon/human/H = owner
+	
+	H.movement_type &= ~FLYING
+	H.verbs -= list(/mob/living/carbon/human/proc/levitation_up, /mob/living/carbon/human/proc/levitation_down)
+
+	animate(H)
+
+	animate(H, pixel_z = 0, pixel_x = 0, time = 5, easing = EASE_OUT)
+
+	addtimer(CALLBACK(H, /mob/living/proc/set_mob_offsets, "levitation", 0, 0), 6)
+	
+	to_chat(H, span_notice("Гравитация вновь обретает власть над вашим телом."))
+	
+	var/turf/T = get_turf(H)
+	if(istype(T, /turf/open/transparent/openspace))
+		to_chat(H, span_userdanger("Под ногами лишь пустота!"))
+	..()
+
+/datum/status_effect/levitation/proc/start_float_animation(mob/living/M)
+	if(!M || QDELETED(M)) return
+
+	animate(M) 
+
+	animate(M, pixel_z = 6, pixel_x = 2, time = 15, loop = -1, easing = EASE_IN | EASE_OUT)
+	animate(pixel_z = 8, pixel_x = 0, time = 15, easing = EASE_IN | EASE_OUT)
+	animate(pixel_z = 4, pixel_x = -2, time = 15, easing = EASE_IN | EASE_OUT)
+	animate(pixel_z = 6, pixel_x = 0, time = 15, easing = EASE_IN | EASE_OUT)
+
+/mob/living/carbon/human/proc/levitation_up()
+	set category = "Alchemy"
+	set name = "Левитация: Вверх"
+	set desc = "Использовать магическую легкость, чтобы взлететь выше."
+
+	if(src.stat != CONSCIOUS) return
+	if(src.pulledby)
+		to_chat(src, span_warning("Вас кто-то держит! Вы не можете взлететь."))
+		return
+
+	src.visible_message(span_notice("[src] плавно взмывает вверх!"), span_notice("Я концентрируюсь на своей легкости и взлетаю..."))
+
+	if(do_after(src, 20, target = src))
+		if(!src.pulledby && (src.movement_type & FLYING))
+			if(src.zMove(UP, TRUE))
+				to_chat(src, span_notice("Я взлетел на уровень выше."))
+			else
+				to_chat(src, span_warning("Там нет свободного пространства!"))
+
+/mob/living/carbon/human/proc/levitation_down()
+	set category = "Alchemy"
+	set name = "Левитация: Вниз"
+	set desc = "Использовать магическую легкость, чтобы плавно опуститься ниже."
+
+	if(src.stat != CONSCIOUS) return
+	if(src.pulledby)
+		to_chat(src, span_warning("Вас кто-то держит! Вы не можете спуститься."))
+		return
+
+	src.visible_message(span_notice("[src] плавно опускается вниз!"), span_notice("Я позволяю гравитации слегка потянуть меня вниз..."))
+	
+	if(do_after(src, 20, target = src))
+		if(!src.pulledby && (src.movement_type & FLYING))
+			if(src.zMove(DOWN, TRUE))
+				to_chat(src, span_notice("Я спустился на уровень ниже."))
+			else
+				to_chat(src, span_warning("Я не могу спуститься туда!"))

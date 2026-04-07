@@ -11,23 +11,23 @@
 
 /datum/alch_cauldron_recipe/advanced/sleep_draught
 	name = "Morpheus Draught"
-	skill_required = SKILL_LEVEL_APPRENTICE
+	skill_required = SKILL_LEVEL_EXPERT
 	output_reagents = list(/datum/reagent/advanced/sleep = ADVANCED_POTION_VOLUME_STANDARD)
 
 /datum/alch_cauldron_recipe/advanced/cats_grace
 	name = "Cat's Grace Draught"
-	skill_required = SKILL_LEVEL_JOURNEYMAN
+	skill_required = SKILL_LEVEL_APPRENTICE
 	output_reagents = list(/datum/reagent/advanced/grace = ADVANCED_POTION_VOLUME_STANDARD)
 
 /datum/alch_cauldron_recipe/advanced/growth
 	name = "Potion of Giant's Might"
-	skill_required = SKILL_LEVEL_EXPERT
+	skill_required = SKILL_LEVEL_APPRENTICE
 	output_reagents = list(/datum/reagent/advanced/growth = ADVANCED_POTION_VOLUME_STANDARD)
 
 
 /datum/alch_cauldron_recipe/advanced/invisible
 	name = "Void Ichor"
-	skill_required = SKILL_LEVEL_EXPERT
+	skill_required = SKILL_LEVEL_APPRENTICE
 	output_reagents = list(/datum/reagent/advanced/invisible = ADVANCED_POTION_VOLUME_STANDARD)
 
 
@@ -60,5 +60,20 @@
 	name = "Titan's Draught"
 	skill_required = SKILL_LEVEL_EXPERT
 	output_reagents = list(/datum/reagent/advanced/titan_strength = ADVANCED_POTION_VOLUME_STANDARD)
+
+/datum/alch_cauldron_recipe/advanced/mirror_potion
+	name = "Grand Opus: Mirror-Form"
+	skill_required = SKILL_LEVEL_EXPERT
+	output_reagents = list(/datum/reagent/advanced/mirror_potion = ADVANCED_POTION_VOLUME_STANDARD)
+
+/datum/alch_cauldron_recipe/advanced/mirror_potion
+	name = "Mirror-Glass Draught"
+	skill_required = SKILL_LEVEL_MASTER
+	output_reagents = list(/datum/reagent/advanced/mirror_potion = ADVANCED_POTION_VOLUME_STANDARD)
+
+/datum/alch_cauldron_recipe/advanced/levitation
+	name = "Alchemical Flight: Levitation"
+	skill_required = SKILL_LEVEL_JOURNEYMAN
+	output_reagents = list(/datum/reagent/advanced/levitation = ADVANCED_POTION_VOLUME_STANDARD)
 
 #undef ADVANCED_POTION_VOLUME_STANDARD

@@ -189,6 +189,7 @@
 		M.mind.remove_antag_datum(/datum/antagonist/zombie)
 		M.remove_status_effect(/datum/status_effect/debuff/rotted_zombie)
 		M.apply_status_effect(/datum/status_effect/debuff/revived)
+		M.apply_status_effect(/datum/status_effect/debuff/revive_grace) // TA EDIT
 		M.remove_status_effect(src)
 
 #define POM_FILTER "pom_aura"

@@ -209,3 +209,41 @@
 	alert_type = /atom/movable/screen/alert/status_effect/shrink
 	effectedstats = list(STATKEY_SPD = -1, STATKEY_CON = -1)
 	duration = 2 MINUTES
+
+/datum/status_effect/debuff/revive_grace
+	id = "revive_grace"
+	duration = 5 MINUTES
+	alert_type = /atom/movable/screen/alert/status_effect/debuff/revive_grace
+	var/died_again = FALSE
+
+/atom/movable/screen/alert/status_effect/debuff/revive_grace
+	name = "Lux Rush"
+	desc = "My Lux is strained from the recent resurrection, burning fiercely at its peak — but I can feel this surge will soon fade."
+	icon_state = "stressb"
+
+/datum/status_effect/debuff/revive_grace/on_apply()
+	. = ..()
+	var/mob/living/carbon/human/H = owner
+	if(!H)
+		return
+	RegisterSignal(H, COMSIG_MOB_DEATH, PROC_REF(on_death))
+
+/datum/status_effect/debuff/revive_grace/on_remove()
+	. = ..()
+	var/mob/living/carbon/human/H = owner
+	if(H)
+		UnregisterSignal(H, COMSIG_MOB_DEATH)
+	if(!died_again && H)
+		ADD_TRAIT(H, TRAIT_DNR, "revive_grace")
+		addtimer(CALLBACK(src, PROC_REF(remove_dnr), H), 1 HOURS)
+
+/datum/status_effect/debuff/revive_grace/proc/on_death()
+	var/mob/living/carbon/human/H = owner
+	if(!H)
+		return
+	died_again = TRUE
+	H.remove_status_effect(type)
+
+/datum/status_effect/debuff/revive_grace/proc/remove_dnr(mob/living/target)
+	if(target)
+		REMOVE_TRAIT(target, TRAIT_DNR, "revive_grace")

@@ -659,12 +659,45 @@ GLOBAL_LIST_INIT(wanderer_combat_skills, list(
 // proc stance forms
 // ------------------------------------------------------------
 
+/datum/component/combo_core/wanderer/proc/CalcPureDamage()
+	if(!owner)
+		return 0
+
+	var/mob/living/carbon/human/H = owner
+	var/used_str = H.get_stat(STATKEY_STR)
+	if(H.domhand)
+		var/hand = H.active_hand_index
+		used_str = H.get_str_arms(hand)
+
+	var/damage
+	if(H.get_stat(STATKEY_STR) > UNARMED_DAMAGE_DEFAULT || H.get_stat(STATKEY_STR) < 10)
+		damage = H.get_stat(STATKEY_STR)
+	else
+		damage = UNARMED_DAMAGE_DEFAULT
+
+	if(used_str >= 11)
+		damage = max(damage + (damage * ((used_str - 10) * 0.33)), 1)
+
+	if(used_str <= 9)
+		damage = max(damage - (damage * ((10 - used_str) * 0.1)), 1)
+
+	var/obj/G = H.get_item_by_slot(SLOT_GLOVES)
+	if(istype(G, /obj/item/clothing/gloves/roguetown))
+		var/obj/item/clothing/gloves/roguetown/GL = G
+		damage = (damage + GL.unarmed_bonus)
+
+	if(H.dna?.species)
+		damage += H.dna.species.punch_damage
+
+	return max(1, round(damage))
+
 /datum/component/combo_core/wanderer/proc/ProcStrike(mob/living/target, zone, damage_mult = 1.0, armor_mult = 1.0)
 	if(!owner || !target)
 		return FALSE
 
 	var/zone_used = TryGetZone(zone)
-	var/dmg = max(1, round(GetComboDamageMultiplier() * damage_mult))
+	var/pure_damage = CalcPureDamage()
+	var/dmg = max(1, round((GetComboDamageMultiplier()/10 + 1) * damage_mult * pure_damage))
 
 	owner.face_atom(target)
 	owner.do_attack_animation(target, ATTACK_EFFECT_DISARM)

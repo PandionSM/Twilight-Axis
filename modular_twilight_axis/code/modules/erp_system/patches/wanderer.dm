@@ -409,10 +409,11 @@ GLOBAL_LIST_INIT(wanderer_combat_skills, list(
 	H.change_stat(STATKEY_WIL, 5)
 	H.change_stat(STATKEY_CON, 4)
 
-	H.adjust_skillrank(/datum/skill/combat/wrestling, 3, TRUE)
-	H.adjust_skillrank(/datum/skill/combat/unarmed, 5, TRUE)
-	H.adjust_skillrank(/datum/skill/misc/athletics, 4, TRUE)
-	H.adjust_skillrank(/datum/skill/misc/music, 5, TRUE)
+	H.adjust_skillrank_up_to(/datum/skill/combat/wrestling, 3, TRUE)
+	H.adjust_skillrank_up_to(/datum/skill/combat/unarmed, 5, TRUE)
+	H.adjust_skillrank_up_to(/datum/skill/misc/athletics, 4, TRUE)
+	H.adjust_skillrank_up_to(/datum/skill/misc/music, 5, TRUE)
+	H.adjust_skillrank_up_to(/datum/skill/craft/cooking, 5, TRUE)
 
 /datum/component/combo_core/wanderer/proc/OnDetachClearHiddenStats()
 	var/mob/living/H = owner

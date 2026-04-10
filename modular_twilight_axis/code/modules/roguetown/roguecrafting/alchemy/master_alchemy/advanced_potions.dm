@@ -66,10 +66,10 @@
 	skill_required = SKILL_LEVEL_JOURNEYMAN
 	output_reagents = list(/datum/reagent/advanced/mist_form = ADVANCED_POTION_VOLUME_STANDARD)
 
-/datum/alch_cauldron_recipe/advanced/mirror_potion
-	name = "Mirror-Glass Draught"
-	skill_required = SKILL_LEVEL_MASTER
-	output_reagents = list(/datum/reagent/advanced/mirror_potion = ADVANCED_POTION_VOLUME_STANDARD)
+///datum/alch_cauldron_recipe/advanced/mirror_potion
+//	name = "Mirror-Glass Draught"
+//	skill_required = SKILL_LEVEL_MASTER
+//	output_reagents = list(/datum/reagent/advanced/mirror_potion = ADVANCED_POTION_VOLUME_STANDARD)
 
 /datum/alch_cauldron_recipe/advanced/levitation
 	name = "Alchemical Flight: Levitation"

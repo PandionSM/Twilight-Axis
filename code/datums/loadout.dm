@@ -2422,6 +2422,12 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/clothing/mask/rogue/xylixmask
 	donatitem = TRUE
 
+/datum/loadout_item/weatheredmask
+	name = "Weathered Xylixian Mask"
+	category = list("Головные уборы", "Донат")
+	path = /obj/item/clothing/mask/rogue/xylixmask/weathered
+	donatitem = TRUE
+
 /datum/loadout_item/donat/eyepatchfake
 	name = "Повязка на правый глаз (ненастоящая)"
 	category = list("Головные уборы", "Донат")

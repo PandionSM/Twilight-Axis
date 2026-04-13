@@ -30,6 +30,8 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 	var/inhand_x_dimension = 64
 	var/inhand_y_dimension = 64
 
+	var/flags_ai_inventory = NONE
+
 	var/no_effect = FALSE
 
 	max_integrity = 200
@@ -145,6 +147,7 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 
 	var/bigboy = FALSE //used to center screen_loc when in hand
 	var/wielded = FALSE
+
 	var/altgripped = FALSE
 	/// Ordered alternate grip states cycled by right-click while the item is held.
 	var/list/alt_grips
@@ -271,6 +274,9 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 	var/smelted = FALSE
 	/// Determines whether this item is silver or not.
 	var/is_silver = FALSE
+	/// "Lesser" silver items still count as silver, but their bite against the silver-weak is muted: no pickup ignition,
+	/// no force-undisguise on hit, and only a slow accumulation of (non-igniting) sunder stacks while held/worn.
+	var/is_lesser_silver = FALSE
 	var/last_used = 0
 	var/toggle_state = null
 	var/icon_x_offset = 0
@@ -496,18 +502,18 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 		to_chat(usr, output)
 
 	if(href_list["explainbalance"])
-		var/output = span_info("A heavy weapon is easier to dodge, and inflicts 2 stamina damage per level of strength differences on a parrying defender. \n\
-		A swift balance weapon reduce the enemy's parry chance by 10% per level of speed difference, by up to 30%, \n\
-		If the defender have higher perception however, the penalty is reduced by 10% per point of difference, down to none.\n\
+		var/output = span_info("A heavy weapon is easier to dodge, and inflicts 2 stamina damage per level of strength difference on a parrying defender. \n\
+		A swift balance weapon reduces the enemy's parry chance by 10% per level of speed difference, by up to 30%. \n\
+		If the defender has higher perception however, the penalty is reduced by 10% per point of difference, down to none.\n\
 		Intelligence also reduces the penalty by 3% per point of difference, down to none.")
 		if(!usr.client.prefs.no_examine_blocks)
 			output = examine_block(output)
 		to_chat(usr, output)
 
-	var/additional_explanation = "This determines the damage dealt by this weapon. Force is increased / decrease by strength above / below 10 by 10% per point of differences,\n\
+	var/additional_explanation = "This determines the damage dealt by this weapon. Force is increased / decreased by strength above / below 10 by 10% per point of difference,\n\
 	Each point of strength at 15 or above only applies an additional +3% damage, except on punches. Damage is also multiplied by damage factor on intents. \n\
-	Both multiplication are applied to the base number, and does not multiply each other. Reduced sharpness decrease the contribution of strength\n\
-	Force, combined with armor penetration on an intent determines whether an attack penetrate the target's armor. Armor penetrating attack deals less damage to the armor itself."
+	Both multipliers are applied to the base number, and do not multiply each other. Reduced sharpness decreases the contribution of strength.\n\
+	Armor penetration on an intent determines whether an attack penetrates the target's armor. Armor penetrating attacks deal less damage to the armor itself."
 	if(href_list["showforce"])
 		var/output = span_info("Actual Force: ([force_dynamic]). [additional_explanation]")
 		if(!usr.client.prefs.no_examine_blocks)
@@ -550,7 +556,7 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 		to_chat(usr, output)
 
 	if(href_list["explainpenfactor"])
-		var/output = span_info("Armor Penetration whether this attack goes through armor.\n\
+		var/output = span_info("Armor Penetration determines whether this attack goes through armor.\n\
 		Each armor piece has a blocking tier (Light, Medium, Heavy, Blacksteel).\n\
 		Penetration > armor tier: 100% damage goes through.\n\
 		Penetration = armor tier: 20% damage through. Armor absorbs remaining %.\n\
@@ -880,7 +886,7 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 		ungrip(user, FALSE)
 	item_flags &= ~IN_INVENTORY
 	SEND_SIGNAL(src, COMSIG_ITEM_DROPPED,user)
-	SEND_SIGNAL(user, COMSIG_ITEM_DROPPED, src)
+	SEND_SIGNAL(user, COMSIG_MOB_DROPITEM, src)
 	if(!silent)
 		playsound(src, drop_sound, DROP_SOUND_VOLUME, TRUE, ignore_walls = FALSE)
 	user.update_equipment_speed_mods()
@@ -916,7 +922,7 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 /obj/item/proc/equipped(mob/user, slot, initial = FALSE)
 	SHOULD_CALL_PARENT(TRUE)
 	SEND_SIGNAL(src, COMSIG_ITEM_EQUIPPED, user, slot)
-	SEND_SIGNAL(user, COMSIG_ITEM_EQUIPPED, src, slot)
+	SEND_SIGNAL(user, COMSIG_MOB_EQUIPPED_ITEM, src, slot)
 	for(var/X in actions)
 		var/datum/action/A = X
 		if(item_action_slot_check(slot, user)) //some items only give their actions buttons when in a specific slot.
@@ -959,7 +965,7 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 //If you are making custom procs but would like to retain partial or complete functionality of this one, include a 'return ..()' to where you want this to happen.
 //Set disable_warning to TRUE if you wish it to not give you outputs.
 /obj/item/proc/mob_can_equip(mob/living/M, mob/living/equipper, slot, disable_warning = FALSE, bypass_equip_delay_self = FALSE)
-	if((is_silver || smeltresult == /obj/item/ingot/silver) && (HAS_TRAIT(M, TRAIT_SILVER_WEAK) &&  !M.has_status_effect(STATUS_EFFECT_ANTIMAGIC)))
+	if((is_silver || smeltresult == /obj/item/ingot/silver) && !is_lesser_silver && (HAS_TRAIT(M, TRAIT_SILVER_WEAK) &&  !M.has_status_effect(STATUS_EFFECT_ANTIMAGIC)))
 		var/datum/antagonist/vampire/V_lord = M.mind?.has_antag_datum(/datum/antagonist/vampire/)
 		if(V_lord?.generation >= GENERATION_METHUSELAH)
 			return
@@ -971,6 +977,11 @@ GLOBAL_VAR_INIT(rpg_loot_items, FALSE)
 		M.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/sunder)
 		M.ignite_mob()
 		return FALSE
+	if(is_lesser_silver && HAS_TRAIT(M, TRAIT_SILVER_WEAK) && !M.has_status_effect(STATUS_EFFECT_ANTIMAGIC))
+		// Kick off the lesser silver exposure timer. The status effect handles grace period,
+		// stress event, and eventual ignition; it self-removes when no lesser silver remains.
+		if(!M.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/lesser))
+			M.apply_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/lesser, 1)
 	//else if(is_blessed && slot == SLOT_HANDS)
 	//	user.add_stress(/datum/stressevent/blessed_weapon)
 	if(twohands_required)

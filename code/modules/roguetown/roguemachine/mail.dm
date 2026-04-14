@@ -207,7 +207,7 @@
 						STR.handle_item_insertion(P, prevent_warning=TRUE)
 						X.new_mail = TRUE
 						X.update_icon()
-						send_ooc_note("You got new letter waiting for you in HERMES.")
+						send_ooc_note("You got new letter waiting for you in HERMES.", name = send2place)
 						for(var/mob/living/carbon/human/H in GLOB.human_list)
 							if(H.real_name == send2place)
 								H.apply_status_effect(/datum/status_effect/ugotmail)

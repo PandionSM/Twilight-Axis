@@ -443,11 +443,7 @@
 "cf" = (
 /obj/effect/decal/cleanable/debris/stony,
 /turf/closed/wall/mineral/rogue/wooddark,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "cg" = (
 /obj/structure/fluff/railing/wood/north{
 	layer = 2.7;
@@ -1195,11 +1191,7 @@
 /area/rogue/outdoors/bograt/safe)
 "gj" = (
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "gk" = (
 /obj/structure/bookcase/random{
 	density = 0;
@@ -1576,11 +1568,7 @@
 /area/rogue/indoors/wretchcamp)
 "il" = (
 /turf/closed/mineral/rogue/cinnabar,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "im" = (
 /obj/structure/flora/roguegrass,
 /turf/open/floor/rogue/grasspurple,
@@ -2647,11 +2635,7 @@
 /area/rogue/outdoors/bograt/safe)
 "nx" = (
 /turf/closed/mineral/rogue/bedrock,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "nA" = (
 /obj/structure/stairs/stone{
 	dir = 8
@@ -3688,11 +3672,7 @@
 /area/rogue/indoors/vampire_manor)
 "ty" = (
 /turf/closed/mineral/random/rogue/med,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "tB" = (
 /obj/machinery/light/rogue/candle/l,
 /turf/open/floor/rogue/tile/bfloorz,
@@ -4037,11 +4017,7 @@
 /area/rogue/indoors/banditcamp)
 "vB" = (
 /turf/closed/mineral/random/rogue/high,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "vC" = (
 /obj/structure/closet/crate/roguecloset,
 /turf/open/floor/rogue/hexstone,
@@ -4096,11 +4072,7 @@
 /area/rogue/outdoors/mountains)
 "wb" = (
 /turf/open/floor/rogue/dirt/road,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "wc" = (
 /obj/effect/decal/edge{
 	color = "#3f3f3f"
@@ -6249,11 +6221,7 @@
 /obj/item/flashlight/flare/torch/lantern/bronzelamptern,
 /obj/item/rogueweapon/pick/aalloy,
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "GC" = (
 /obj/structure/table/wood{
 	dir = 9;
@@ -6402,10 +6370,6 @@
 	},
 /turf/open/floor/rogue/dirt/road,
 /area/rogue/under/cave)
-"Hw" = (
-/obj/effect/decal/cleanable/roguerune/god/dendor,
-/turf/open/floor/rogue/cobble,
-/area/rogue/indoors/wretchcamp)
 "Hx" = (
 /obj/structure/fluff/statue/knight,
 /obj/effect/decal/edge{
@@ -6642,11 +6606,7 @@
 "IV" = (
 /obj/structure/minecart_rail,
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "IX" = (
 /obj/structure/closet/crate/roguecloset,
 /obj/item/soap/bath,
@@ -6932,11 +6892,7 @@
 "Kn" = (
 /obj/machinery/light/rogue/firebowl/stump,
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "Kp" = (
 /obj/structure/far_travel{
 	desc = "The everwinter fields of Gehenna beckon you. Anywhere is better than here.\n(Drag your sprite onto this to exit the round!)";
@@ -7349,11 +7305,7 @@
 	dir = 8
 	},
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "Mk" = (
 /obj/machinery/light/rogue/torchholder/c,
 /obj/structure/bars/cemetery,
@@ -7872,11 +7824,7 @@
 "Ow" = (
 /obj/structure/vine,
 /turf/open/floor/rogue/naturalstone,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "Ox" = (
 /obj/structure/fermentation_keg/water,
 /turf/open/floor/rogue/tile/bfloorz,
@@ -8068,7 +8016,6 @@
 /turf/open/floor/rogue/ruinedwood/herringbone,
 /area/rogue/indoors/wretchcamp)
 "Pl" = (
-/obj/effect/decal/cleanable/roguerune/god/ravox,
 /obj/item/rogueweapon/sword/stone,
 /turf/open/floor/rogue/cobble,
 /area/rogue/indoors/wretchcamp)
@@ -9120,11 +9067,7 @@
 /area/rogue/indoors/banditcamp)
 "UD" = (
 /turf/closed/mineral/random/rogue,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "UG" = (
 /obj/structure/rack/rogue,
 /obj/item/rogueweapon/mace/woodclub,
@@ -9990,11 +9933,7 @@
 /area/rogue/outdoors/bograt/safe)
 "Yw" = (
 /turf/closed/mineral/rogue/elementalmote,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "Yz" = (
 /turf/closed/wall/mineral/rogue/stone,
 /area/rogue/outdoors/banditcamp)
@@ -10193,11 +10132,7 @@
 /area/rogue/indoors/vampire_manor)
 "Zu" = (
 /turf/closed/wall/mineral/rogue/wooddark,
-/area/rogue/under/cavewet/bogcaves{
-	ambush_mobs = null;
-	first_time_text = null;
-	name = "Wretched Caves"
-	})
+/area/rogue/under/cavewet/bogcaves)
 "Zw" = (
 /obj/structure/fluff/walldeco/chains{
 	icon_state = "chains5"
@@ -22425,7 +22360,7 @@ QE
 QE
 QE
 kF
-Hw
+ra
 ra
 wY
 tj

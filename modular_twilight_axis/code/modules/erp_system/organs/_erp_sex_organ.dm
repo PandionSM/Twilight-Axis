@@ -293,51 +293,48 @@
 	return
 
 /datum/erp_sex_organ/proc/sanitize_owner_links(datum/erp_controller/C)
-	if(!islist(links) || !links.len)
+	if(!C)
+		return FALSE
+	if(!links || !links.len)
 		return FALSE
 
-	var/list/new_links = list()
 	var/changed = FALSE
-
-	for(var/datum/erp_sex_link/L in links)
+	for(var/i = links.len; i >= 1; i--)
+		var/datum/erp_sex_link/L = links[i]
+		var/to_cut = FALSE
 		if(!L || QDELETED(L))
+			links.Cut(i, i + 1)
 			changed = TRUE
 			continue
 
-		if(L.init_organ != src && L.target_organ != src)
-			if(C?.links && (L in C.links))
-				C.links -= L
-			L.finish()
-			qdel(L)
-			changed = TRUE
+		if(L.init_organ != src)
 			continue
 
 		if(L.state != LINK_STATE_ACTIVE)
-			if(C?.links && (L in C.links))
+			to_cut = TRUE
+		if(!C.links || !(L in C.links))
+			to_cut = TRUE
+		if(!L.actor_active || QDELETED(L.actor_active))
+			to_cut = TRUE
+		if(!L.actor_passive || QDELETED(L.actor_passive))
+			to_cut = TRUE
+		if(!L.init_organ || QDELETED(L.init_organ))
+			to_cut = TRUE
+		if(!L.target_organ || QDELETED(L.target_organ))
+			to_cut = TRUE
+		if(!L.action || QDELETED(L.action))
+			to_cut = TRUE
+
+		if(to_cut)
+			links.Cut(i, i + 1)
+
+			if(C.links && (L in C.links))
 				C.links -= L
+
 			L.finish()
 			qdel(L)
+
 			changed = TRUE
-			continue
-
-		if(C && (!islist(C.links) || !(L in C.links)))
-			L.finish()
-			qdel(L)
-			changed = TRUE
-			continue
-
-		if(!L.is_valid())
-			if(C?.links && (L in C.links))
-				C.links -= L
-			L.finish()
-			qdel(L)
-			changed = TRUE
-			continue
-
-		new_links += L
-
-	if(changed)
-		links = new_links
 
 	return changed
 

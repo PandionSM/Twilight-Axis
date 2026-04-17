@@ -3,6 +3,7 @@
 	var/datum/species/dominant_species
 	var/datum/species/dominant_race
 	var/list/members = list()
+	var/list/member_nodes = list()
 	var/list/family_icons = list()
 	var/datum/family_member/founder
 	var/datum/family_member/house_leader
@@ -27,10 +28,10 @@
 	return new_curse
 
 /datum/heritage/proc/ApplyCurseEffects(datum/family_curse/curse)
-	for(var/datum/family_member/F as anything in members)
-		if(F.person)
+	for(var/datum/family_node/node as anything in member_nodes)
+		if(node.person)
 			for(var/effect in curse.curse_effects)
-				F.person.apply_status_effect(effect)
+				node.person.apply_status_effect(effect)
 
 /datum/heritage/proc/InheritCurses(datum/family_member/child)
 	for(var/datum/family_curse/curse as anything in family_curses)
@@ -62,9 +63,9 @@
 
 	var/announcement = "[bride.person?.real_name] и [groom.person?.real_name] сочетались браком в семье [housename]!"
 
-	for(var/datum/family_member/member as anything in members)
-		if(member.person && member.person?.client)
-			to_chat(member.person, span_love(announcement))
+	for(var/datum/family_node/node as anything in member_nodes)
+		if(node.person && node.person?.client)
+			to_chat(node.person, span_love(announcement))
 
 	bride.HandleBiologicalChildren(groom)
 
@@ -108,15 +109,15 @@
 
 	var/mob/living/carbon/human/person = member.person
 
-	var/list/member_parents = member.parents.Copy()
+	var/list/member_parents = member.get_parent_members()
 	for(var/datum/family_member/parent as anything in member_parents)
 		member.RemoveParent(parent)
 
-	var/list/member_children = member.children.Copy()
+	var/list/member_children = member.get_child_members()
 	for(var/datum/family_member/child as anything in member_children)
 		member.RemoveChild(child)
 
-	var/list/member_spouses = member.spouses.Copy()
+	var/list/member_spouses = member.get_spouse_members()
 	for(var/datum/family_member/spouse as anything in member_spouses)
 		var/mob/living/carbon/human/spouse_person = spouse?.person
 		member.RemoveSpouse(spouse)
@@ -124,24 +125,18 @@
 			person.spouse_mob = null
 		if(spouse_person && spouse_person.spouse_mob == person)
 			var/mob/living/carbon/human/replacement_spouse = null
-			for(var/datum/family_member/other_spouse as anything in spouse.spouses)
+			for(var/datum/family_member/other_spouse as anything in spouse.get_spouse_members())
 				if(other_spouse?.person)
 					replacement_spouse = other_spouse.person
 					break
 			spouse_person.spouse_mob = replacement_spouse
 
-	var/list/member_former_spouses = member.former_spouses.Copy()
-	for(var/datum/family_member/former_spouse as anything in member_former_spouses)
-		if(former_spouse?.former_spouses)
-			former_spouse.former_spouses -= member
-	member.former_spouses.Cut()
-
 	if(person)
 		var/image/member_icon = family_icons[person]
 		if(member_icon)
-			for(var/datum/family_member/viewer_member as anything in members)
-				if(viewer_member.person?.client)
-					viewer_member.person.client.images.Remove(member_icon)
+			for(var/datum/family_node/viewer_node as anything in member_nodes)
+				if(viewer_node.person?.client)
+					viewer_node.person.client.images.Remove(member_icon)
 			family_icons.Remove(person)
 
 	members -= member
@@ -159,9 +154,8 @@
 			person.family_member_datum = null
 		person.spouse_mob = null
 
-	member.parents.Cut()
-	member.children.Cut()
-	member.spouses.Cut()
+	member.phantom_parent_members.Cut()
+	member.phantom_child_members.Cut()
 	if(person)
 		SSfamilytree.graph_on_member_removed(person, src)
 	member.person = null
@@ -182,9 +176,9 @@
 	if(!ishuman(person))
 		return null
 
-	for(var/datum/family_member/existing as anything in members)
-		if(existing.person == person)
-			return existing
+	var/datum/family_member/existing_fast = person.family_member_datum
+	if(existing_fast && existing_fast.family == src)
+		return existing_fast
 
 	if(person.family_datum && person.family_datum != src)
 		person.family_datum.RemovePersonFromFamily(person)
@@ -206,10 +200,10 @@
 /datum/heritage/proc/IntroduceFamilyMember(mob/living/carbon/human/new_person)
 	if(!new_person)
 		return
-	for(var/datum/family_member/member as anything in members)
-		if(!member.person || member.person == new_person)
+	for(var/datum/family_node/node as anything in member_nodes)
+		if(!node.person || node.person == new_person)
 			continue
-		SSfamilytree.introduce_pair(new_person, member.person)
+		SSfamilytree.introduce_pair(new_person, node.person)
 
 /datum/heritage/proc/AddToFamily(mob/living/carbon/human/person, datum/family_member/parent1, datum/family_member/parent2, adopt = FALSE)
 	var/datum/family_member/new_member = CreateFamilyMember(person)
@@ -243,7 +237,7 @@
 	if(!person1 || !person2)
 		return FALSE
 
-	if(person2 in person1.spouses)
+	if(person2 in person1.get_spouse_members())
 		return FALSE
 
 	person1.AddSpouse(person2)
@@ -257,6 +251,11 @@
 	return TRUE
 
 /datum/heritage/proc/GetFamilyMember(mob/living/carbon/human/person)
+	if(!person)
+		return null
+	var/datum/family_member/fast = person.family_member_datum
+	if(fast && fast.family == src)
+		return fast
 	for(var/datum/family_member/member as anything in members)
 		if(member.person == person)
 			return member
@@ -311,9 +310,10 @@
 	var/list/details = list()
 	if(member.adoption_status)
 		details += "Adopted"
-	if(member.spouses.len)
+	var/list/member_spouses_list = member.get_spouse_members()
+	if(member_spouses_list.len)
 		var/list/spouse_names = list()
-		for(var/datum/family_member/spouse as anything in member.spouses)
+		for(var/datum/family_member/spouse as anything in member_spouses_list)
 			if(spouse.person?.real_name)
 				spouse_names += spouse.person.real_name
 		if(spouse_names.len)
@@ -361,6 +361,11 @@
 	return TRUE
 
 /datum/heritage/proc/GetMemberForPerson(mob/living/carbon/human/P)
+	if(!P)
+		return null
+	var/datum/family_member/fast = P.family_member_datum
+	if(fast && fast.family == src)
+		return fast
 	for(var/datum/family_member/member as anything in members)
 		if(member.person == P)
 			return member
@@ -418,7 +423,7 @@
 		return node
 
 	if(include_spouses)
-		for(var/datum/family_member/spouse as anything in root_member.spouses)
+		for(var/datum/family_member/spouse as anything in root_member.get_spouse_members())
 			if(!spouse || visited[spouse])
 				continue
 			var/list/spouse_node = BuildFamilyTree(spouse, checker_member, visited, depth + 1, FALSE, FALSE)
@@ -426,7 +431,7 @@
 				node["spouses"] += list(spouse_node)
 
 	if(include_children)
-		for(var/datum/family_member/child as anything in root_member.children)
+		for(var/datum/family_member/child as anything in root_member.get_child_members())
 			if(!child || visited[child])
 				continue
 			var/list/child_node = BuildFamilyTree(child, checker_member, visited, depth + 1, TRUE, TRUE)
@@ -447,9 +452,9 @@
 	for(var/datum/family_member/member as anything in members)
 		if(!member)
 			continue
-		if(member.parents.len)
+		if(member.get_parent_members().len)
 			continue
-		if(!member.person && !member.children.len)
+		if(!member.person && !member.get_child_members().len)
 			continue
 		root_candidates += member
 
@@ -511,7 +516,7 @@
 /datum/heritage/proc/ListFamily(mob/living/carbon/human/checker)
 	if(!checker)
 		return FALSE
-	if(!members.len)
+	if(!member_nodes.len)
 		return FALSE
 
 	var/datum/familytree_display_panel/panel = new(
@@ -637,8 +642,8 @@
 		iconer.client.images.Add(family_icons[H])
 
 /datum/heritage/proc/LateJoinAddToUI(mob/living/carbon/human/new_fam)
-	for(var/datum/family_member/member as anything in members)
-		var/mob/living/carbon/human/H = member.person
+	for(var/datum/family_node/node as anything in member_nodes)
+		var/mob/living/carbon/human/H = node.person
 		if(H && H.family_UI && H.client && H != new_fam)
 			if(new_fam in family_icons)
 				H.client.images.Add(family_icons[new_fam])

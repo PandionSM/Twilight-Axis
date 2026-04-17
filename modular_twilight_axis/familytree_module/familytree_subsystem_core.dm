@@ -80,13 +80,13 @@ SUBSYSTEM_DEF(familytree)
 			bound_count++
 	ftlog("[tag] players: assigned=[assigned_count] pending=[pending_count] signal_bound=[bound_count]", FTLOG_INFO)
 	for(var/datum/heritage/house as anything in families)
-		if(!house.members.len)
+		if(!house.member_nodes.len)
 			continue
 		var/list/names = list()
-		for(var/datum/family_member/member as anything in house.members)
-			if(member.person)
-				names += "[member.person.real_name]([member.person.ckey || "NPC"])"
-		ftlog("[tag] HOUSE '[house.housename]' race=[house.dominant_race] members=[house.members.len]: [names.Join(", ")]", FTLOG_DEBUG)
+		for(var/datum/family_node/node as anything in house.member_nodes)
+			if(node.person)
+				names += "[node.person.real_name]([node.person.ckey || "NPC"])"
+		ftlog("[tag] HOUSE '[house.housename]' race=[house.dominant_race] members=[house.member_nodes.len]: [names.Join(", ")]", FTLOG_DEBUG)
 	ftlog("=== /[tag] ===", FTLOG_INFO)
 #endif
 

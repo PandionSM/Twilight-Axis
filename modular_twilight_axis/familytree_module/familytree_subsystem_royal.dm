@@ -341,8 +341,9 @@
 			if(monarch)
 				member.generation = monarch.generation + 1
 				member.AddParent(monarch)
-				if(monarch.spouses.len)
-					member.AddParent(monarch.spouses[1])
+				var/list/monarch_spouses = monarch.get_spouse_members()
+				if(monarch_spouses.len)
+					member.AddParent(monarch_spouses[1])
 
 		if(FAMILY_OMMER)
 			CreateBranchFamily(member)
@@ -363,9 +364,10 @@
 
 	hand_member.generation = monarch.generation
 
-	if(monarch.parents.len)
-		var/datum/family_member/monarch_parent = monarch.parents[1]
-		var/datum/family_member/monarch_parent_second = monarch.parents[2]
+	var/list/monarch_parents = monarch.get_parent_members()
+	if(monarch_parents.len)
+		var/datum/family_member/monarch_parent = monarch_parents[1]
+		var/datum/family_member/monarch_parent_second = monarch_parents.len > 1 ? monarch_parents[2] : null
 		if(monarch_parent)
 			hand_member.AddParent(monarch_parent)
 		if(monarch_parent_second)

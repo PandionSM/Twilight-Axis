@@ -206,7 +206,7 @@
 	for(var/mob/living/carbon/human/H in view(divorce_range, priest))
 		if(H == priest || H.stat == DEAD || !H.client || !H.ckey)
 			continue
-		if(H.spouse_mob && H.family_member_datum?.spouses?.len)
+		if(H.spouse_mob && H.family_member_datum?.get_spouse_members().len)
 			married_people += H
 
 	if(!married_people.len)
@@ -286,8 +286,9 @@
 	if(!existing_member)
 		return FALSE
 
-	var/datum/family_member/parent1 = existing_member.parents.len > 0 ? existing_member.parents[1] : null
-	var/datum/family_member/parent2 = existing_member.parents.len > 1 ? existing_member.parents[2] : null
+	var/list/existing_parents = existing_member.get_parent_members()
+	var/datum/family_member/parent1 = existing_parents.len > 0 ? existing_parents[1] : null
+	var/datum/family_member/parent2 = existing_parents.len > 1 ? existing_parents[2] : null
 	if(!parent1)
 		var/datum/family_member/phantom_parent = new /datum/family_member(null, target_house)
 		phantom_parent.generation = -1

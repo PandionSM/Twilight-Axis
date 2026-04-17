@@ -182,8 +182,9 @@
 		var/datum/heritage/house = favorite.family_datum
 		if(status == FAMILY_NEWLYWED || status == FAMILY_FULL)
 			var/favorite_has_dummy_spouse = FALSE
-			if(favorite.family_member_datum?.spouses.len)
-				var/datum/family_member/existing_spouse_member = favorite.family_member_datum.spouses[1]
+			var/list/favorite_spouses = favorite.family_member_datum?.get_spouse_members()
+			if(favorite_spouses?.len)
+				var/datum/family_member/existing_spouse_member = favorite_spouses[1]
 				if(existing_spouse_member?.person && istype(existing_spouse_member.person, /mob/living/carbon/human/dummy))
 					favorite_has_dummy_spouse = TRUE
 			if(!favorite_has_dummy_spouse && !familytree_polygamy_compatible(H, favorite))
@@ -195,8 +196,9 @@
 			else
 				var/datum/family_member/new_member = house.CreateFamilyMember(H)
 				if(new_member && favorite.family_member_datum)
-					if(favorite.family_member_datum.spouses.len)
-						var/datum/family_member/old_dummy = favorite.family_member_datum.spouses[1]
+					var/list/cur_favorite_spouses = favorite.family_member_datum.get_spouse_members()
+					if(cur_favorite_spouses.len)
+						var/datum/family_member/old_dummy = cur_favorite_spouses[1]
 						if(old_dummy?.person && istype(old_dummy.person, /mob/living/carbon/human/dummy))
 							favorite.family_member_datum.RemoveSpouse(old_dummy)
 							house.members -= old_dummy
@@ -226,9 +228,9 @@
 		return null
 
 	for(var/datum/heritage/house as anything in families)
-		for(var/datum/family_member/member as anything in house.members)
-			if(member.person && familytree_names_match(member.person.real_name, H.setspouse))
-				return member.person
+		for(var/datum/family_node/node as anything in house.member_nodes)
+			if(node.person && familytree_names_match(node.person.real_name, H.setspouse))
+				return node.person
 
 	for(var/mob/living/carbon/human/candidate as anything in viable_spouses)
 		if(candidate == H)
@@ -269,7 +271,7 @@
 			continue
 		if(WouldCreateAgeConflict(house, H))
 			continue
-		if(house.members.len < 1)
+		if(house.member_nodes.len < 1)
 			continue
 		if(!house_has_online_member(house))
 			continue
@@ -278,7 +280,7 @@
 
 	if(candidates.len)
 		var/datum/heritage/chosen_house = pick_weighted_house(candidates)
-		ftlog("AssignToHouse: [H.real_name] → JOINED existing house '[chosen_house.housename || "no name"]' (members=[chosen_house.members.len])")
+		ftlog("AssignToHouse: [H.real_name] → JOINED existing house '[chosen_house.housename || "no name"]' (members=[chosen_house.member_nodes.len])")
 		AddPersonToHouse(chosen_house, H, FALSE)
 		stop_tracking_human(H, "assigned to house")
 	else
@@ -334,8 +336,9 @@
 		if("sibling")
 			for(var/datum/family_member/member as anything in house.members)
 				if(member.person && CanBeSiblings(member.person.age, person.age))
-					var/datum/family_member/parent1 = member.parents.len > 0 ? member.parents[1] : null
-					var/datum/family_member/parent2 = member.parents.len > 1 ? member.parents[2] : null
+					var/list/member_parents = member.get_parent_members()
+					var/datum/family_member/parent1 = member_parents.len > 0 ? member_parents[1] : null
+					var/datum/family_member/parent2 = member_parents.len > 1 ? member_parents[2] : null
 					house.AddToFamily(person, parent1, parent2, adopted)
 					break
 
@@ -584,12 +587,12 @@
 			continue
 		if(!house_race_compatible(house, base_species, base_isolated))
 			continue
-		if(!house.housename || house.members.len < 2)
+		if(!house.housename || house.member_nodes.len < 2)
 			continue
 
 		var/has_compatible_parent = FALSE
 		for(var/datum/family_member/member as anything in house.members)
-			if(member.children.len > 0 && member.person?.client)
+			if(member.get_child_members().len > 0 && member.person?.client)
 				if(!GetSpeciesCompatibilityFailureReason(H, member.person))
 					has_compatible_parent = TRUE
 					break
@@ -602,8 +605,8 @@
 		var/datum/family_member/new_member = chosen_house.CreateFamilyMember(H)
 		if(new_member)
 			for(var/datum/family_member/member as anything in chosen_house.members)
-				if(member.children.len > 0 && member.person && CanBeSiblings(H.age, member.person.age))
-					for(var/datum/family_member/grandparent as anything in member.parents)
+				if(member.get_child_members().len > 0 && member.person && CanBeSiblings(H.age, member.person.age))
+					for(var/datum/family_member/grandparent as anything in member.get_parent_members())
 						new_member.AddParent(grandparent)
 					break
 
@@ -683,7 +686,7 @@
 			continue
 		if(WouldCreateAgeConflict(house, H))
 			continue
-		if(house.members.len >= 1 && house_has_online_member(house))
+		if(house.member_nodes.len >= 1 && house_has_online_member(house))
 			return TRUE
 
 	return FALSE
@@ -715,10 +718,19 @@
 /datum/controller/subsystem/familytree/proc/house_has_online_member(datum/heritage/house)
 	if(!house)
 		return FALSE
-	for(var/datum/family_member/member as anything in house.members)
-		if(member.person?.client)
+	for(var/datum/family_node/node as anything in house.member_nodes)
+		if(node.person?.client)
 			return TRUE
 	return FALSE
+
+/datum/controller/subsystem/familytree/proc/count_online_members(datum/heritage/house)
+	if(!house)
+		return 0
+	var/online_count = 0
+	for(var/datum/family_node/node as anything in house.member_nodes)
+		if(node.person?.client)
+			online_count++
+	return online_count
 
 /datum/controller/subsystem/familytree/proc/pick_weighted_house(list/candidates)
 	if(!candidates.len)
@@ -728,10 +740,7 @@
 	var/total_weight = 0
 	var/list/weights = list()
 	for(var/datum/heritage/house as anything in candidates)
-		var/online_count = 0
-		for(var/datum/family_member/member as anything in house.members)
-			if(member.person?.client)
-				online_count++
+		var/online_count = count_online_members(house)
 		var/weight = 1
 		if(online_count >= 2 && online_count < 4)
 			weight = 5

@@ -97,6 +97,28 @@
 			out += other
 	return out
 
+/datum/family_node/proc/get_parent_nodes()
+	var/list/out = list()
+	for(var/datum/family_edge/edge as anything in edges)
+		if(edge.relation_type != "parent_child" && edge.relation_type != "adoptive_parent_child")
+			continue
+		if(edge.b != src)
+			continue
+		if(edge.a && !(edge.a in out))
+			out += edge.a
+	return out
+
+/datum/family_node/proc/get_child_nodes()
+	var/list/out = list()
+	for(var/datum/family_edge/edge as anything in edges)
+		if(edge.relation_type != "parent_child" && edge.relation_type != "adoptive_parent_child")
+			continue
+		if(edge.a != src)
+			continue
+		if(edge.b && !(edge.b in out))
+			out += edge.b
+	return out
+
 /datum/family_graph_cache
 	var/datum/heritage/owner_house
 	var/dirty_relations = TRUE
@@ -238,43 +260,7 @@
 /datum/controller/subsystem/familytree/proc/graph_compare_house(datum/heritage/house, list/out_mismatches)
 	if(!house || !out_mismatches)
 		return 0
-	var/mismatch_count = 0
-	for(var/datum/family_member/member as anything in house.members)
-		if(!member)
-			continue
-		var/datum/family_node/node = get_family_node(member.person)
-		if(!node)
-			if(member.person)
-				out_mismatches += "[house.housename || "Unnamed"]: no graph node for [member.person.real_name]"
-				mismatch_count++
-			continue
-
-		for(var/datum/family_member/parent as anything in member.parents)
-			if(!parent?.person)
-				continue
-			var/datum/family_node/parent_node = get_family_node(parent.person)
-			if(!parent_node)
-				out_mismatches += "[house.housename || "Unnamed"]: parent [parent.person.real_name] of [member.person?.real_name] has no node"
-				mismatch_count++
-				continue
-			var/has_bio = parent_node.has_edge_to(node, "parent_child", TRUE)
-			var/has_adopt = parent_node.has_edge_to(node, "adoptive_parent_child", TRUE)
-			if(!has_bio && !has_adopt)
-				out_mismatches += "[house.housename || "Unnamed"]: no parent_child edge [parent.person.real_name] -> [member.person?.real_name]"
-				mismatch_count++
-
-		for(var/datum/family_member/spouse as anything in member.spouses)
-			if(!spouse?.person)
-				continue
-			var/datum/family_node/spouse_node = get_family_node(spouse.person)
-			if(!spouse_node)
-				out_mismatches += "[house.housename || "Unnamed"]: spouse [spouse.person.real_name] of [member.person?.real_name] has no node"
-				mismatch_count++
-				continue
-			if(!node.has_edge_to(spouse_node, "spouse", FALSE))
-				out_mismatches += "[house.housename || "Unnamed"]: no spouse edge [member.person?.real_name] <-> [spouse.person.real_name]"
-				mismatch_count++
-	return mismatch_count
+	return graph_validate_house(house, out_mismatches)
 
 /datum/controller/subsystem/familytree/proc/graph_compare_all(list/out_mismatches)
 	if(!out_mismatches)

@@ -107,7 +107,7 @@
 	var/our_isolated = is_isolated(H)
 
 	for(var/datum/heritage/house as anything in families)
-		if(!house.housename || !house.members.len)
+		if(!house.housename || !house.member_nodes.len)
 			continue
 		if(!house_race_compatible(house, our_race, our_isolated))
 			continue
@@ -124,8 +124,9 @@
 			if(!familytree_role_tiers_compatible(H, member.person))
 				continue
 
-			var/datum/family_member/parent1 = member.parents.len > 0 ? member.parents[1] : null
-			var/datum/family_member/parent2 = member.parents.len > 1 ? member.parents[2] : null
+			var/list/member_parents = member.get_parent_members()
+			var/datum/family_member/parent1 = member_parents.len > 0 ? member_parents[1] : null
+			var/datum/family_member/parent2 = member_parents.len > 1 ? member_parents[2] : null
 			house.AddToFamily(H, parent1, parent2, FALSE)
 			return
 
@@ -139,7 +140,7 @@
 	var/our_isolated = is_isolated(H)
 
 	for(var/datum/heritage/house as anything in families)
-		if(!house.housename || !house.members.len)
+		if(!house.housename || !house.member_nodes.len)
 			continue
 		if(!house_race_compatible(house, our_race, our_isolated))
 			continue
@@ -149,7 +150,7 @@
 				continue
 			if(!CanBeParentOf(H, member.person))
 				continue
-			if(member.parents.len >= 2)
+			if(member.get_parent_members().len >= 2)
 				continue
 			if(GetSpeciesCompatibilityFailureReason(H, member.person))
 				continue

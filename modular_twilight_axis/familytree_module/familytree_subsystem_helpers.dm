@@ -380,18 +380,18 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 	return FALSE
 
 /datum/controller/subsystem/familytree/proc/WouldCreateAgeConflict(datum/heritage/house, mob/living/carbon/human/person)
-	if(!house.members.len)
+	if(!house.member_nodes.len)
 		return FALSE
-	for(var/datum/family_member/member as anything in house.members)
-		if(!member.person)
+	for(var/datum/family_node/node as anything in house.member_nodes)
+		if(!node.person)
 			continue
 
-		for(var/datum/family_member/child as anything in member.children)
-			if(child.person && !CanBeParentOf(person, child.person))
+		for(var/datum/family_node/child_node as anything in node.get_child_nodes())
+			if(child_node.person && !CanBeParentOf(person, child_node.person))
 				return TRUE
 
-		for(var/datum/family_member/parent as anything in member.parents)
-			if(parent.person && !CanBeParentOf(parent.person, person))
+		for(var/datum/family_node/parent_node as anything in node.get_parent_nodes())
+			if(parent_node.person && !CanBeParentOf(parent_node.person, person))
 				return TRUE
 
 	return FALSE
@@ -400,26 +400,25 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 	var/list/possible_roles = list()
 
 	var/can_be_child = FALSE
-	for(var/datum/family_member/member as anything in house.members)
-		if(member.person && CanBeParentOf(member.person, person))
+	var/can_be_sibling = FALSE
+	var/can_be_parent = FALSE
+	for(var/datum/family_node/node as anything in house.member_nodes)
+		var/mob/living/carbon/human/other = node.person
+		if(!other)
+			continue
+		if(!can_be_child && CanBeParentOf(other, person))
 			can_be_child = TRUE
+		if(!can_be_sibling && CanBeSiblings(other.age, person.age))
+			can_be_sibling = TRUE
+		if(!can_be_parent && CanBeParentOf(person, other))
+			can_be_parent = TRUE
+		if(can_be_child && can_be_sibling && can_be_parent)
 			break
+
 	if(can_be_child)
 		possible_roles += "child"
-
-	var/can_be_sibling = FALSE
-	for(var/datum/family_member/member as anything in house.members)
-		if(member.person && CanBeSiblings(member.person.age, person.age))
-			can_be_sibling = TRUE
-			break
 	if(can_be_sibling)
 		possible_roles += "sibling"
-
-	var/can_be_parent = FALSE
-	for(var/datum/family_member/member as anything in house.members)
-		if(member.person && CanBeParentOf(person, member.person))
-			can_be_parent = TRUE
-			break
 	if(can_be_parent)
 		possible_roles += "parent"
 
@@ -429,27 +428,15 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 	return pick(possible_roles)
 
 /datum/controller/subsystem/familytree/proc/ValidateAllFamilies()
-	if(ruling_family && ruling_family.members.len)
+	if(ruling_family && ruling_family.member_nodes.len)
 		ValidateFamily(ruling_family)
 	for(var/datum/heritage/family as anything in families)
-		if(family.members.len)
+		if(family.member_nodes.len)
 			ValidateFamily(family)
 
 /datum/controller/subsystem/familytree/proc/ValidateFamily(datum/heritage/family)
-	for(var/datum/family_member/member as anything in family.members)
-		if(!member.person)
-			if(!member.phantom)
-				family.members -= member
-			continue
-
-		for(var/datum/family_member/parent as anything in member.parents)
-			if(!parent.person || !(member in parent.children))
-				member.parents -= parent
-				if(parent.person)
-					parent.children -= member
-
-		for(var/datum/family_member/child as anything in member.children)
-			if(!child.person || !(member in child.parents))
-				member.children -= child
-				if(child.person)
-					child.parents -= member
+	if(!family)
+		return
+	for(var/datum/family_member/member as anything in family.members.Copy())
+		if(!member.person && !member.phantom)
+			family.members -= member

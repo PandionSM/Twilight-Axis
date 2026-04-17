@@ -26,6 +26,8 @@
 /datum/controller/subsystem/familytree/proc/remove_family_node(datum/family_node/node)
 	if(!node)
 		return FALSE
+	if(node.primary_house)
+		node.primary_house.member_nodes -= node
 	if(node.person)
 		family_nodes_by_person -= node.person
 	family_nodes -= node
@@ -162,9 +164,14 @@
 	var/datum/family_node/node = get_or_create_family_node(person, house)
 	if(house && node.primary_house != house)
 		if(node.primary_house)
+			node.primary_house.member_nodes -= node
 			mark_family_dirty(node, null, node.primary_house)
 		node.primary_house = house
+		if(!(node in house.member_nodes))
+			house.member_nodes += node
 		mark_family_dirty(node, null, house)
+	else if(house && !(node in house.member_nodes))
+		house.member_nodes += node
 	if(newly_tracked)
 		RegisterSignal(person, COMSIG_PARENT_QDELETING, PROC_REF(graph_on_person_qdeleting), override = TRUE)
 	return node
@@ -187,6 +194,7 @@
 		for(var/datum/family_edge/edge as anything in node.edges.Copy())
 			if(edge.house == house)
 				remove_family_edge(edge, "member_removed")
+		house.member_nodes -= node
 	if(node.primary_house == house)
 		node.primary_house = null
 		node.bump_revision()

@@ -233,8 +233,8 @@
 	if(!seeker || !target)
 		return FALSE
 
-	var/seeker_has_spouse = seeker.spouse_mob || (seeker.family_member_datum && seeker.family_member_datum.spouses.len)
-	var/target_has_spouse = target.spouse_mob || (target.family_member_datum && target.family_member_datum.spouses.len)
+	var/seeker_has_spouse = seeker.spouse_mob || (seeker.family_member_datum && seeker.family_member_datum.get_spouse_members().len)
+	var/target_has_spouse = target.spouse_mob || (target.family_member_datum && target.family_member_datum.get_spouse_members().len)
 
 	if(!seeker_has_spouse && !target_has_spouse)
 		return TRUE

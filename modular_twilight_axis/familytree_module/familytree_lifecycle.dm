@@ -87,10 +87,11 @@
 	var/datum/family_member/monarch = GetCurrentMonarch()
 	if(monarch)
 		if(CanBeSiblings(H.age, monarch.person?.age))
-			if(monarch.parents.len)
-				new_member.AddParent(monarch.parents[1])
-				if(monarch.parents.len > 1)
-					new_member.AddParent(monarch.parents[2])
+			var/list/monarch_parents = monarch.get_parent_members()
+			if(monarch_parents.len)
+				new_member.AddParent(monarch_parents[1])
+				if(monarch_parents.len > 1)
+					new_member.AddParent(monarch_parents[2])
 			new_member.generation = monarch.generation
 		else
 			new_member.generation = monarch.generation

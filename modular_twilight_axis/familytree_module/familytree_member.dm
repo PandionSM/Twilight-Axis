@@ -1,10 +1,8 @@
 /datum/family_member
 	var/tmp/mob/living/carbon/human/person
 	var/datum/heritage/family
-	var/list/parents = list()
-	var/list/children = list()
-	var/list/spouses = list()
-	var/list/former_spouses = list()
+	var/list/phantom_parent_members = list()
+	var/list/phantom_child_members = list()
 	var/adoption_status = FALSE
 	var/generation = 0
 	var/phantom = FALSE
@@ -23,100 +21,141 @@
 	person?.dir = old_dir
 	person?.invisibility = old_invisibility
 
-/datum/family_member/proc/AddParent(datum/family_member/parent, skip_reciprocal = FALSE)
-	if(!parent || (parent in parents))
-		return FALSE
-	if(parents.len >= 2)
-		return FALSE
+/datum/family_member/proc/get_parent_members()
+	var/list/out = list()
+	for(var/datum/family_member/p as anything in phantom_parent_members)
+		if(p)
+			out += p
+	if(!person)
+		return out
+	var/datum/family_node/node = SSfamilytree.get_family_node(person)
+	if(!node)
+		return out
+	for(var/datum/family_node/parent_node as anything in node.get_parent_nodes())
+		var/datum/family_member/pm = parent_node.person?.family_member_datum
+		if(pm && !(pm in out))
+			out += pm
+	return out
 
+/datum/family_member/proc/get_child_members()
+	var/list/out = list()
+	for(var/datum/family_member/c as anything in phantom_child_members)
+		if(c)
+			out += c
+	if(!person)
+		return out
+	var/datum/family_node/node = SSfamilytree.get_family_node(person)
+	if(!node)
+		return out
+	for(var/datum/family_node/child_node as anything in node.get_child_nodes())
+		var/datum/family_member/cm = child_node.person?.family_member_datum
+		if(cm && !(cm in out))
+			out += cm
+	return out
+
+/datum/family_member/proc/get_spouse_members()
+	var/list/out = list()
+	if(!person)
+		return out
+	var/datum/family_node/node = SSfamilytree.get_family_node(person)
+	if(!node)
+		return out
+	for(var/datum/family_edge/edge as anything in node.get_edges_of_type("spouse"))
+		var/datum/family_node/other = edge.other_end(node)
+		var/datum/family_member/sm = other?.person?.family_member_datum
+		if(sm && !(sm in out))
+			out += sm
+	return out
+
+/datum/family_member/proc/get_former_spouse_members()
+	var/list/out = list()
+	if(!person)
+		return out
+	var/datum/family_node/node = SSfamilytree.get_family_node(person)
+	if(!node)
+		return out
+	for(var/datum/family_edge/edge as anything in node.get_edges_of_type("former_spouse"))
+		var/datum/family_node/other = edge.other_end(node)
+		var/datum/family_member/sm = other?.person?.family_member_datum
+		if(sm && !(sm in out))
+			out += sm
+	return out
+
+/datum/family_member/proc/AddParent(datum/family_member/parent, skip_reciprocal = FALSE)
+	if(!parent || parent == src)
+		return FALSE
+	var/list/current_parents = get_parent_members()
+	if(parent in current_parents)
+		return FALSE
+	if(current_parents.len >= 2)
+		return FALSE
 	if(IsAncestorOf(parent))
 		return FALSE
 
-	parents += parent
-
-	if(!skip_reciprocal && !(src in parent.children))
-		parent.AddChild(src, TRUE)
-
-	SSfamilytree.graph_on_parent_added(parent.person, person, family, adoption_status)
+	if(parent.phantom || !parent.person)
+		phantom_parent_members += parent
+		if(!(src in parent.phantom_child_members))
+			parent.phantom_child_members += src
+	else if(person)
+		SSfamilytree.graph_on_parent_added(parent.person, person, family, adoption_status)
+	else
+		return FALSE
 
 	RecalculateGeneration()
 	return TRUE
 
 /datum/family_member/proc/RemoveParent(datum/family_member/parent, skip_reciprocal = FALSE)
-	if(!parent || !(parent in parents))
+	if(!parent)
 		return FALSE
-
-	parents -= parent
-
-	if(!skip_reciprocal && (src in parent.children))
-		parent.RemoveChild(src, TRUE)
-
-	SSfamilytree.graph_on_parent_removed(parent.person, person)
-
+	var/removed = FALSE
+	if(parent in phantom_parent_members)
+		phantom_parent_members -= parent
+		parent.phantom_child_members -= src
+		removed = TRUE
+	if(person && parent.person)
+		SSfamilytree.graph_on_parent_removed(parent.person, person)
+		removed = TRUE
+	if(!removed)
+		return FALSE
 	RecalculateGeneration()
 	return TRUE
 
 /datum/family_member/proc/AddChild(datum/family_member/child, skip_reciprocal = FALSE)
-	if(!child || (child in children))
+	if(!child)
 		return FALSE
-
-	if(IsDescendantOf(child))
-		return FALSE
-
-	children += child
-
-	if(!skip_reciprocal && !(src in child.parents))
-		child.AddParent(src, TRUE)
-
-	child.RecalculateGeneration()
-	return TRUE
+	return child.AddParent(src, skip_reciprocal)
 
 /datum/family_member/proc/RemoveChild(datum/family_member/child, skip_reciprocal = FALSE)
-	if(!child || !(child in children))
+	if(!child)
 		return FALSE
-
-	children -= child
-
-	if(!skip_reciprocal && (src in child.parents))
-		child.RemoveParent(src, TRUE)
-
-	child.RecalculateGeneration()
-	return TRUE
+	return child.RemoveParent(src, skip_reciprocal)
 
 /datum/family_member/proc/AddSpouse(datum/family_member/spouse, skip_reciprocal = FALSE)
-	if(!spouse || (spouse in spouses))
+	if(!spouse || spouse == src || !person || !spouse.person)
+		return FALSE
+	if(spouse in get_spouse_members())
 		return FALSE
 
-	spouses += spouse
 	person.spouse_mob = spouse.person
+	if(!spouse.person.spouse_mob)
+		spouse.person.spouse_mob = person
 
-	if(!skip_reciprocal && !(src in spouse.spouses))
-		spouse.AddSpouse(src, TRUE)
-
-	if(!skip_reciprocal)
-		SSfamilytree.graph_on_spouse_added(person, spouse.person, family)
-
+	SSfamilytree.graph_on_spouse_added(person, spouse.person, family)
 	HandleBiologicalChildren(spouse)
 	return TRUE
 
 /datum/family_member/proc/RemoveSpouse(datum/family_member/spouse, divorce = FALSE, skip_reciprocal = FALSE)
-	if(!spouse || !(spouse in spouses))
+	if(!spouse || !person || !spouse.person)
+		return FALSE
+	if(!(spouse in get_spouse_members()))
 		return FALSE
 
-	spouses -= spouse
+	SSfamilytree.graph_on_spouse_removed(person, spouse.person, divorce)
 
-	if(!skip_reciprocal && (src in spouse.spouses))
-		spouse.RemoveSpouse(src, divorce, TRUE)
-
-	if(divorce)
-		if(!(spouse in former_spouses))
-			former_spouses += spouse
-		if(!skip_reciprocal && !(src in spouse.former_spouses))
-			spouse.former_spouses += src
-
-	if(!skip_reciprocal)
-		SSfamilytree.graph_on_spouse_removed(person, spouse.person, divorce)
-
+	if(person.spouse_mob == spouse.person)
+		person.spouse_mob = null
+	if(spouse.person.spouse_mob == person)
+		spouse.person.spouse_mob = null
 	return TRUE
 
 /datum/family_member/proc/IsAncestorOf(datum/family_member/other)
@@ -124,7 +163,7 @@
 		return FALSE
 
 	var/list/checked = list(src)
-	var/list/to_check = children.Copy()
+	var/list/to_check = get_child_members()
 
 	while(to_check.len)
 		var/datum/family_member/current = to_check[1]
@@ -135,7 +174,7 @@
 
 		if(!(current in checked))
 			checked += current
-			to_check += current.children
+			to_check += current.get_child_members()
 
 	return FALSE
 
@@ -144,7 +183,7 @@
 		return FALSE
 
 	var/list/checked = list(src)
-	var/list/to_check = parents.Copy()
+	var/list/to_check = get_parent_members()
 
 	while(to_check.len)
 		var/datum/family_member/current = to_check[1]
@@ -155,15 +194,18 @@
 
 		if(!(current in checked))
 			checked += current
-			to_check += current.parents
+			to_check += current.get_parent_members()
 
 	return FALSE
 
 /datum/family_member/proc/HandleBiologicalChildren(datum/family_member/spouse)
+	if(!spouse || !person || !spouse.person)
+		return
 	if(SSfamilytree.is_sterile_species(person) || SSfamilytree.is_sterile_species(spouse.person))
 		return
-	for(var/datum/family_member/child as anything in children)
-		if(child in spouse.children)
+	var/list/spouse_children = spouse.get_child_members()
+	for(var/datum/family_member/child as anything in get_child_members())
+		if(child in spouse_children)
 			if(family.SpeciesCalculation(child.person, person, spouse.person))
 				child.adoption_status = FALSE
 				child.person?.MixDNA(person, spouse.person, override = TRUE)
@@ -173,18 +215,19 @@
 		return
 	recalculating_generation = TRUE
 
-	if(!parents.len)
+	var/list/my_parents = get_parent_members()
+	if(!my_parents.len)
 		generation = 0
 	else
 		var/max_parent_gen = -1
-		for(var/datum/family_member/parent as anything in parents)
+		for(var/datum/family_member/parent as anything in my_parents)
 			if(parent.generation > max_parent_gen)
 				max_parent_gen = parent.generation
 		generation = max_parent_gen + 1
 
 	recalculating_generation = FALSE
 
-	for(var/datum/family_member/child as anything in children)
+	for(var/datum/family_member/child as anything in get_child_members())
 		if(!child.recalculating_generation)
 			child.RecalculateGeneration()
 
@@ -310,15 +353,19 @@
 	if(!other || other == src)
 		return null
 
-	if(other in parents)
+	var/list/my_parents = get_parent_members()
+	if(other in my_parents)
 		if(adoption_status)
 			return "adoptive [other.GetParentTerm()]"
 		return other.GetParentTerm()
-	if(other in children)
+
+	var/list/my_children = get_child_members()
+	if(other in my_children)
 		if(other.adoption_status)
 			return "adopted [other.GetChildTerm()]"
 		return other.GetChildTerm()
-	if(other in spouses)
+
+	if(other in get_spouse_members())
 		return other.GetSpouseTerm()
 
 	if(AreSiblings(other))
@@ -355,24 +402,26 @@
 	return "distant relative"
 
 /datum/family_member/proc/GetInLawRelation(datum/family_member/other)
-	for(var/datum/family_member/spouse as anything in spouses)
-		if(other in spouse.parents)
+	for(var/datum/family_member/spouse as anything in get_spouse_members())
+		var/list/spouse_parents = spouse.get_parent_members()
+		if(other in spouse_parents)
 			return other.GetParentInLawTerm()
-		if(other in spouse.children)
+		var/list/spouse_children = spouse.get_child_members()
+		if(other in spouse_children)
 			return other.GetChildInLawTerm()
 		if(spouse.AreSiblings(other))
 			return other.GetSiblingInLawTerm()
 
-		for(var/datum/family_member/spouse_parent as anything in spouse.parents)
-			if(other in spouse_parent.parents)
+		for(var/datum/family_member/spouse_parent as anything in spouse_parents)
+			if(other in spouse_parent.get_parent_members())
 				return other.GetGrandparentInLawTerm()
 
 	for(var/datum/family_member/member as anything in family.members)
-		if(AreSiblings(member) && (other in member.spouses))
+		if(AreSiblings(member) && (other in member.get_spouse_members()))
 			return other.GetSiblingInLawTerm()
 
-	for(var/datum/family_member/child as anything in children)
-		if(other in child.spouses)
+	for(var/datum/family_member/child as anything in get_child_members())
+		if(other in child.get_spouse_members())
 			return other.GetChildInLawTerm()
 
 	return null
@@ -380,58 +429,59 @@
 /datum/family_member/proc/AreSiblings(datum/family_member/other)
 	if(!other || other == src)
 		return FALSE
-	if(!parents.len || !other.parents.len)
+	var/list/my_parents = get_parent_members()
+	if(!my_parents.len)
+		return FALSE
+	var/list/other_parents = other.get_parent_members()
+	if(!other_parents.len)
 		return FALSE
 
-	for(var/datum/family_member/my_parent as anything in parents)
-		if(my_parent in other.parents)
+	for(var/datum/family_member/my_parent as anything in my_parents)
+		if(my_parent in other_parents)
 			return TRUE
 	return FALSE
 
 /datum/family_member/proc/GetAuntUncleRelation(datum/family_member/other)
-	for(var/datum/family_member/parent as anything in parents)
+	for(var/datum/family_member/parent as anything in get_parent_members())
 		if(other.AreSiblings(parent) && other != parent)
 			return other.GetAuntUncleTerm()
 	return null
 
 /datum/family_member/proc/GetNieceNephewRelation(datum/family_member/other)
 	for(var/datum/family_member/sibling as anything in family.members)
-		if(AreSiblings(sibling) && (sibling != src) && (other in sibling.children))
+		if(AreSiblings(sibling) && (sibling != src) && (other in sibling.get_child_members()))
 			return other.GetNieceNephewTerm()
 	return null
 
-
 /datum/family_member/proc/GetGrandparentRelation(datum/family_member/other)
-	for(var/datum/family_member/parent as anything in parents)
-		if(other in parent.parents)
+	for(var/datum/family_member/parent as anything in get_parent_members())
+		if(other in parent.get_parent_members())
 			return other.GetGrandparentTerm()
 	return null
 
 /datum/family_member/proc/GetGrandchildRelation(datum/family_member/other)
-	for(var/datum/family_member/child as anything in children)
-		if(other in child.children)
+	for(var/datum/family_member/child as anything in get_child_members())
+		if(other in child.get_child_members())
 			return other.GetGrandchildTerm()
 	return null
 
-
 /datum/family_member/proc/GetCousinRelation(datum/family_member/other)
-	for(var/datum/family_member/my_parent as anything in parents)
-		for(var/datum/family_member/their_parent as anything in other.parents)
+	var/list/other_parents = other.get_parent_members()
+	for(var/datum/family_member/my_parent as anything in get_parent_members())
+		for(var/datum/family_member/their_parent as anything in other_parents)
 			if(my_parent.AreSiblings(their_parent))
 				return "cousin"
-
 	return null
 
-
 /datum/family_member/proc/GetGreatRelation(datum/family_member/other)
-	for(var/datum/family_member/parent as anything in parents)
-		for(var/datum/family_member/grandparent as anything in parent.parents)
-			if(other in grandparent.parents)
+	for(var/datum/family_member/parent as anything in get_parent_members())
+		for(var/datum/family_member/grandparent as anything in parent.get_parent_members())
+			if(other in grandparent.get_parent_members())
 				return other.GetGreatGrandparentTerm()
 
-	for(var/datum/family_member/child as anything in children)
-		for(var/datum/family_member/grandchild as anything in child.children)
-			if(other in grandchild.children)
+	for(var/datum/family_member/child as anything in get_child_members())
+		for(var/datum/family_member/grandchild as anything in child.get_child_members())
+			if(other in grandchild.get_child_members())
 				return other.GetGreatGrandchildTerm()
 
 	return null

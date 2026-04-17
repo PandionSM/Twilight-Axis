@@ -262,7 +262,7 @@
 	var/list/seen = list()
 
 	if(family_member_datum)
-		for(var/datum/family_member/spouse_member as anything in family_member_datum.spouses)
+		for(var/datum/family_member/spouse_member as anything in family_member_datum.get_spouse_members())
 			var/mob/living/carbon/human/spouse = spouse_member?.person
 			if(!spouse || QDELETED(spouse) || seen[spouse])
 				continue

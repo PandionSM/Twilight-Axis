@@ -85,6 +85,99 @@
 		if(!majority_species)
 			dominant_species = founder_person?.dna?.species?.type
 
+/datum/heritage/proc/SelectReplacementHouseHead()
+	var/datum/family_member/replacement = null
+	for(var/datum/family_member/member as anything in members)
+		if(member?.person && !member.phantom)
+			replacement = member
+			break
+	if(!replacement)
+		for(var/datum/family_member/member as anything in members)
+			if(member)
+				replacement = member
+				break
+	if(!founder || !(founder in members))
+		founder = replacement
+	if(!house_leader || !(house_leader in members))
+		house_leader = replacement
+	return replacement
+
+/datum/heritage/proc/RemoveFamilyMember(datum/family_member/member, clear_person_refs = TRUE)
+	if(!member || !(member in members))
+		return FALSE
+
+	var/mob/living/carbon/human/person = member.person
+
+	var/list/member_parents = member.parents.Copy()
+	for(var/datum/family_member/parent as anything in member_parents)
+		member.RemoveParent(parent)
+
+	var/list/member_children = member.children.Copy()
+	for(var/datum/family_member/child as anything in member_children)
+		member.RemoveChild(child)
+
+	var/list/member_spouses = member.spouses.Copy()
+	for(var/datum/family_member/spouse as anything in member_spouses)
+		var/mob/living/carbon/human/spouse_person = spouse?.person
+		member.RemoveSpouse(spouse)
+		if(person && person.spouse_mob == spouse_person)
+			person.spouse_mob = null
+		if(spouse_person && spouse_person.spouse_mob == person)
+			var/mob/living/carbon/human/replacement_spouse = null
+			for(var/datum/family_member/other_spouse as anything in spouse.spouses)
+				if(other_spouse?.person)
+					replacement_spouse = other_spouse.person
+					break
+			spouse_person.spouse_mob = replacement_spouse
+
+	var/list/member_former_spouses = member.former_spouses.Copy()
+	for(var/datum/family_member/former_spouse as anything in member_former_spouses)
+		if(former_spouse?.former_spouses)
+			former_spouse.former_spouses -= member
+	member.former_spouses.Cut()
+
+	if(person)
+		var/image/member_icon = family_icons[person]
+		if(member_icon)
+			for(var/datum/family_member/viewer_member as anything in members)
+				if(viewer_member.person?.client)
+					viewer_member.person.client.images.Remove(member_icon)
+			family_icons.Remove(person)
+
+	members -= member
+
+	if(founder == member)
+		founder = null
+	if(house_leader == member)
+		house_leader = null
+	SelectReplacementHouseHead()
+
+	if(clear_person_refs && person)
+		if(person.family_datum == src)
+			person.family_datum = null
+		if(person.family_member_datum == member)
+			person.family_member_datum = null
+		person.spouse_mob = null
+
+	member.parents.Cut()
+	member.children.Cut()
+	member.spouses.Cut()
+	if(person)
+		SSfamilytree.graph_on_member_removed(person, src)
+	member.person = null
+	member.family = null
+	return TRUE
+
+/datum/heritage/proc/RemovePersonFromFamily(mob/living/carbon/human/person, clear_person_refs = TRUE)
+	if(!person)
+		return FALSE
+	var/datum/family_member/member = GetFamilyMember(person)
+	if(!member && person.family_member_datum?.family == src)
+		member = person.family_member_datum
+	if(!member)
+		return FALSE
+	return RemoveFamilyMember(member, clear_person_refs)
+
 /datum/heritage/proc/CreateFamilyMember(mob/living/carbon/human/person)
 	if(!ishuman(person))
 		return null
@@ -93,9 +186,16 @@
 		if(existing.person == person)
 			return existing
 
+	if(person.family_datum && person.family_datum != src)
+		person.family_datum.RemovePersonFromFamily(person)
+	else if(person.family_member_datum?.family && person.family_member_datum.family != src)
+		person.family_member_datum.family.RemoveFamilyMember(person.family_member_datum)
+
 	var/datum/family_member/new_member = new(person, src)
 	members += new_member
 	person?.family_datum = src
+
+	SSfamilytree.graph_on_member_created(person, src)
 
 	IntroduceFamilyMember(person)
 	AddFamilyIcon(person)
@@ -128,10 +228,12 @@
 			person?.MixDNA(parent1.person, parent2.person, override = TRUE)
 		else
 			new_member.adoption_status = TRUE
+			SSfamilytree.graph_sync_adoption_status(person, TRUE)
 	else if(!adopt)
 		var/datum/family_member/known_parent = parent1 ? parent1 : parent2
 		if(known_parent && !SingleParentSpeciesCalculation(person, known_parent.person))
 			new_member.adoption_status = TRUE
+			SSfamilytree.graph_sync_adoption_status(person, TRUE)
 
 	to_chat(person, span_notice("Вы были добавлены в семью [housename]."))
 	InheritCurses(new_member)
@@ -170,7 +272,7 @@
 	if(!looker_member || !lookee_member)
 		return null
 
-	var/relationship = looker_member.GetRelationshipTo(lookee_member)
+	var/relationship = SSfamilytree.get_cached_relation(src, looker_member, lookee_member)
 	if(!relationship)
 		return null
 
@@ -279,18 +381,103 @@
 		else
 			return "Generation [generation]"
 
-/datum/heritage/proc/ListFamily(mob/living/carbon/human/checker)
-	if(!checker)
-		return FALSE
-	if(!members.len)
-		return FALSE
+/datum/heritage/proc/BuildFamilyTree(datum/family_member/root_member, datum/family_member/checker_member, list/visited = null, depth = 0, include_spouses = TRUE, include_children = TRUE)
+	if(!root_member)
+		return null
+	if(!visited)
+		visited = list()
+	if(visited[root_member])
+		return null
+	visited[root_member] = TRUE
 
-	var/datum/familytree_display_panel/panel = new(
-		checker,
-		GetDisplayHouseTitle(),
-		"",
-		"No family members found.",
+	var/relation_text = checker_member ? checker_member.GetRelationshipTo(root_member) : null
+	var/list/details = list()
+	if(root_member == checker_member)
+		details += "You"
+	if(root_member.adoption_status)
+		details += "Adopted"
+	if(root_member.phantom)
+		details += "Unrecorded ancestor"
+	if(root_member.person?.dna?.species?.name)
+		details += root_member.person.dna.species.name
+
+	var/list/node = list(
+		"name" = root_member.person ? root_member.person.real_name : "Unknown",
+		"label" = relation_text ? uppertext(relation_text) : null,
+		"details" = details,
+		"accentColor" = GetRelationColor(relation_text),
+		"isSelf" = (root_member == checker_member),
+		"phantom" = root_member.phantom,
+		"spouses" = list(),
+		"children" = list(),
 	)
+
+	if(depth >= 24)
+		var/list/node_details = node["details"]
+		node_details += "Tree depth limit"
+		return node
+
+	if(include_spouses)
+		for(var/datum/family_member/spouse as anything in root_member.spouses)
+			if(!spouse || visited[spouse])
+				continue
+			var/list/spouse_node = BuildFamilyTree(spouse, checker_member, visited, depth + 1, FALSE, FALSE)
+			if(spouse_node)
+				node["spouses"] += list(spouse_node)
+
+	if(include_children)
+		for(var/datum/family_member/child as anything in root_member.children)
+			if(!child || visited[child])
+				continue
+			var/list/child_node = BuildFamilyTree(child, checker_member, visited, depth + 1, TRUE, TRUE)
+			if(child_node)
+				node["children"] += list(child_node)
+
+	return node
+
+/datum/heritage/proc/BuildFamilyTreeRoots(mob/living/carbon/human/checker)
+	var/list/tree_roots = list()
+	if(!members.len)
+		return tree_roots
+
+	var/datum/family_member/checker_member = GetMemberForPerson(checker)
+	var/list/visited = list()
+	var/list/root_candidates = list()
+
+	for(var/datum/family_member/member as anything in members)
+		if(!member)
+			continue
+		if(member.parents.len)
+			continue
+		if(!member.person && !member.children.len)
+			continue
+		root_candidates += member
+
+	if(!root_candidates.len)
+		if(founder)
+			root_candidates += founder
+		else if(house_leader)
+			root_candidates += house_leader
+		else if(members.len)
+			root_candidates += members[1]
+
+	for(var/datum/family_member/root as anything in root_candidates)
+		var/list/root_node = BuildFamilyTree(root, checker_member, visited)
+		if(root_node)
+			tree_roots += list(root_node)
+
+	for(var/datum/family_member/member as anything in members)
+		if(!member?.person || visited[member])
+			continue
+		var/list/orphan_node = BuildFamilyTree(member, checker_member, visited)
+		if(orphan_node)
+			tree_roots += list(orphan_node)
+
+	return tree_roots
+
+/datum/heritage/proc/AddFamilyDisplaySections(datum/familytree_display_panel/panel, mob/living/carbon/human/checker)
+	if(!panel || !members.len)
+		return FALSE
 
 	var/datum/family_member/checker_member = GetMemberForPerson(checker)
 	var/list/by_generation = list()
@@ -305,6 +492,7 @@
 
 	generation_order = sortList(generation_order, GLOBAL_PROC_REF(cmp_numeric_asc))
 
+	var/added_sections = FALSE
 	for(var/generation as anything in generation_order)
 		var/list/entries = list()
 		for(var/datum/family_member/member as anything in by_generation["[generation]"])
@@ -316,7 +504,24 @@
 		if(!entries.len)
 			continue
 		panel.add_section(GetGenerationName(generation), entries)
+		added_sections = TRUE
 
+	return added_sections
+
+/datum/heritage/proc/ListFamily(mob/living/carbon/human/checker)
+	if(!checker)
+		return FALSE
+	if(!members.len)
+		return FALSE
+
+	var/datum/familytree_display_panel/panel = new(
+		checker,
+		GetDisplayHouseTitle(),
+		"",
+		"No family members found.",
+	)
+
+	panel.set_tree_data(SSfamilytree.get_display_tree_for(src, checker))
 	panel.ui_interact(checker)
 	return TRUE
 

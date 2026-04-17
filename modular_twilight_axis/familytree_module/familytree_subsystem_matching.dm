@@ -84,7 +84,9 @@
 		retry_local_assignment(H, "no suitable house found after confirm")
 
 /datum/controller/subsystem/familytree/proc/find_and_confirm_newlywed(mob/living/carbon/human/H)
-	if(!H || QDELETED(H) || H.spouse_mob)
+	if(!H || QDELETED(H))
+		return
+	if(H.spouse_mob && !familytree_can_have_multiple_spouses(H))
 		return
 	var/mob/living/carbon/human/spouse = FindNewlyWedMatch(H)
 	if(!spouse)
@@ -94,15 +96,20 @@
 	request_mutual_confirmation(H, spouse, CALLBACK(src, PROC_REF(do_execute_newlywed), H, spouse), "spouse")
 
 /datum/controller/subsystem/familytree/proc/do_execute_newlywed(mob/living/carbon/human/H, mob/living/carbon/human/spouse)
-	if(!H || QDELETED(H) || H.spouse_mob)
+	if(!H || QDELETED(H))
 		return
-	if(!spouse || QDELETED(spouse) || spouse.spouse_mob)
+	if(!spouse || QDELETED(spouse))
 		retry_local_assignment(H, "spouse unavailable after confirm")
+		return
+	if(!familytree_polygamy_compatible(H, spouse))
+		retry_local_assignment(H, "spouse already married")
 		return
 	ftlog("AddLocal: [H.real_name] + [spouse.real_name] -> MarryTo (both confirmed)")
 	viable_spouses -= H
 	viable_spouses -= spouse
-	H.MarryTo(spouse)
+	var/datum/heritage/family = H.MarryTo(spouse)
+	if(family)
+		on_family_formed(family)
 	introduce_pair(H, spouse)
 	stop_tracking_human(H, "newlywed flow matched spouse")
 	stop_tracking_human(spouse, "newlywed flow matched spouse")
@@ -114,7 +121,7 @@
 	if(!match)
 		ftlog("AddLocal: [H.real_name] family no match found, creating new house")
 		var/datum/heritage/new_house = new /datum/heritage(H, null)
-		families += new_house
+		register_family(new_house)
 		ftlog("AddLocal: [H.real_name] founded new house '[new_house.housename]'")
 		stop_tracking_human(H, "founded new house (no match)")
 		return
@@ -132,13 +139,14 @@
 	if(!house || !partner_member?.person)
 		retry_local_assignment(H, "partner lost")
 		return
-	if(partner_member.spouses.len)
+	if(!familytree_polygamy_compatible(H, partner_member.person))
 		retry_local_assignment(H, "partner already married")
 		return
 	ftlog("AddLocal: [H.real_name] -> AssignToFamily in house=[house.housename] (both confirmed)")
 	var/datum/family_member/new_member = house.CreateFamilyMember(H)
 	if(new_member)
 		house.MarryMembers(new_member, partner_member)
+		on_family_formed(house)
 		introduce_pair(H, partner_member.person)
 	if(H.family_datum)
 		stop_tracking_human(H, "assigned to family")
@@ -173,23 +181,40 @@
 	if(favorite.family_datum)
 		var/datum/heritage/house = favorite.family_datum
 		if(status == FAMILY_NEWLYWED || status == FAMILY_FULL)
-			var/datum/family_member/new_member = house.CreateFamilyMember(H)
-			if(new_member && favorite.family_member_datum)
-				if(favorite.family_member_datum.spouses.len)
-					var/datum/family_member/old_dummy = favorite.family_member_datum.spouses[1]
-					if(old_dummy?.person && istype(old_dummy.person, /mob/living/carbon/human/dummy))
-						favorite.family_member_datum.RemoveSpouse(old_dummy)
-						house.members -= old_dummy
-						qdel(old_dummy.person)
-						qdel(old_dummy)
-				new_member.generation = favorite.family_member_datum.generation
-				house.MarryMembers(H.family_member_datum, favorite.family_member_datum)
+			var/favorite_has_dummy_spouse = FALSE
+			if(favorite.family_member_datum?.spouses.len)
+				var/datum/family_member/existing_spouse_member = favorite.family_member_datum.spouses[1]
+				if(existing_spouse_member?.person && istype(existing_spouse_member.person, /mob/living/carbon/human/dummy))
+					favorite_has_dummy_spouse = TRUE
+			if(!favorite_has_dummy_spouse && !familytree_polygamy_compatible(H, favorite))
+				return "skip"
+			if(H.family_datum && H.family_datum != house)
+				var/datum/heritage/favorite_family = H.MarryTo(favorite)
+				if(favorite_family)
+					on_family_formed(favorite_family)
+			else
+				var/datum/family_member/new_member = house.CreateFamilyMember(H)
+				if(new_member && favorite.family_member_datum)
+					if(favorite.family_member_datum.spouses.len)
+						var/datum/family_member/old_dummy = favorite.family_member_datum.spouses[1]
+						if(old_dummy?.person && istype(old_dummy.person, /mob/living/carbon/human/dummy))
+							favorite.family_member_datum.RemoveSpouse(old_dummy)
+							house.members -= old_dummy
+							qdel(old_dummy.person)
+							qdel(old_dummy)
+					new_member.generation = favorite.family_member_datum.generation
+					house.MarryMembers(H.family_member_datum, favorite.family_member_datum)
+					on_family_formed(house)
 		else
 			house.CreateFamilyMember(H)
 		return "assigned"
 
 	if(status == FAMILY_NEWLYWED || status == FAMILY_FULL)
-		H.MarryTo(favorite)
+		if(!familytree_polygamy_compatible(H, favorite))
+			return "skip"
+		var/datum/heritage/family = H.MarryTo(favorite)
+		if(family)
+			on_family_formed(family)
 		viable_spouses -= favorite
 		viable_spouses -= H
 		return "assigned"
@@ -338,7 +363,7 @@
 
 		var/has_single_adult = FALSE
 		for(var/datum/family_member/member as anything in house.members)
-			if(member.person && !member.spouses.len)
+			if(member.person && familytree_polygamy_compatible(H, member.person))
 				if(!member.person.client)
 					continue
 				if(!member.person.setspouse || familytree_names_match(member.person.setspouse, H.real_name))
@@ -363,13 +388,13 @@
 	if(!eligible_houses.len)
 		ftlog("AssignToFamily: [H.real_name] no eligible houses, creating new")
 		var/datum/heritage/new_house = new /datum/heritage(H, null)
-		families += new_house
+		register_family(new_house)
 		ftlog("AssignToFamily: [H.real_name] founded new house '[new_house.housename]'")
 		return
 
 	for(var/datum/heritage/house as anything in eligible_houses)
 		for(var/datum/family_member/member as anything in house.members)
-			if(member.person && !member.spouses.len)
+			if(member.person && familytree_polygamy_compatible(H, member.person))
 				if(!member.person.client)
 					continue
 				if(!member.person.setspouse || familytree_names_match(member.person.setspouse, H.real_name))
@@ -377,6 +402,7 @@
 						var/datum/family_member/new_member = house.CreateFamilyMember(H)
 						if(new_member)
 							house.MarryMembers(new_member, member)
+							on_family_formed(house)
 							return
 
 		if(!house.housename)
@@ -399,7 +425,9 @@
 
 	var/list/potential_matches = list()
 	for(var/mob/living/carbon/human/candidate as anything in viable_spouses)
-		if(!candidate || candidate == H || candidate.spouse_mob)
+		if(!candidate || candidate == H)
+			continue
+		if(!familytree_polygamy_compatible(H, candidate))
 			continue
 		if(candidate.familytree_opted_out)
 			continue
@@ -451,7 +479,7 @@
 		if(!house_race_compatible(house, our_race, our_isolated))
 			continue
 		for(var/datum/family_member/member as anything in house.members)
-			if(member.person && !member.spouses.len)
+			if(member.person && familytree_polygamy_compatible(H, member.person))
 				if(!member.person.client)
 					continue
 				if(!member.person.setspouse || familytree_names_match(member.person.setspouse, H.real_name))
@@ -492,7 +520,7 @@
 	for(var/mob/living/carbon/human/potential_spouse as anything in viable_spouses)
 		if(!potential_spouse || potential_spouse == H)
 			continue
-		if(potential_spouse.spouse_mob)
+		if(!familytree_polygamy_compatible(H, potential_spouse))
 			continue
 		var/potential_block_reason = get_familytree_runtime_block_reason(potential_spouse, TRUE)
 		if(potential_block_reason == "dead")
@@ -540,7 +568,9 @@
 			ftlog("AssignNewlyWed: [H.real_name] MARRIED to [chosen_spouse.real_name]")
 			viable_spouses -= chosen_spouse
 			viable_spouses -= H
-			H.MarryTo(chosen_spouse)
+			var/datum/heritage/family = H.MarryTo(chosen_spouse)
+			if(family)
+				on_family_formed(family)
 	else
 		ftlog("AssignNewlyWed: [H.real_name] no matches, staying in viable_spouses")
 
@@ -586,7 +616,7 @@
 	var/datum/heritage/new_house = new /datum/heritage(initiator, null)
 	new_house.closed = TRUE
 	new_house.house_leader = new_house.founder
-	families += new_house
+	register_family(new_house)
 
 	var/datum/family_member/phantom_parent = new /datum/family_member(null, new_house)
 	phantom_parent.generation = -1

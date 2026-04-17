@@ -110,6 +110,8 @@
 				continue
 			if(!familytree_role_tiers_compatible(person1, candidate))
 				continue
+			if(!familytree_polygamy_compatible(person1, candidate))
+				continue
 		else
 			if(SSfamilytree.is_isolated(person1) || SSfamilytree.is_isolated(candidate))
 				if(person1.dna?.species?.type != candidate.dna?.species?.type)
@@ -126,6 +128,10 @@
 
 	if(bond_type_is_marriage(bond_type) && person1.spouse_mob == person2)
 		to_chat(priest, span_warning("Они уже состоят в браке."))
+		return
+
+	if(!can_bypass && bond_type_is_marriage(bond_type) && !familytree_polygamy_compatible(person1, person2))
+		to_chat(priest, span_warning("РЈС‡Р°СЃС‚РЅРёРєРё РЅРµ РіРѕС‚РѕРІС‹ Рє С‚Р°РєРѕРјСѓ Р±СЂР°РєСѓ."))
 		return
 
 	var/instr = bond_type_instrumental(bond_type)
@@ -250,7 +256,7 @@
 	if(!parent.family_datum)
 		var/datum/heritage/new_family = new /datum/heritage(parent, null)
 		parent.family_datum = new_family
-		SSfamilytree.families += new_family
+		SSfamilytree.register_family(new_family)
 
 	var/datum/family_member/parent_member = parent.family_member_datum
 	if(!parent_member)
@@ -263,24 +269,35 @@
 	if(!person1 || !person2)
 		return FALSE
 
+	var/mob/living/carbon/human/new_sibling = person1
+	var/mob/living/carbon/human/anchor_person = person2
 	var/datum/heritage/target_house = person2.family_datum
-	if(!target_house)
+	if(!target_house && person1.family_datum)
 		target_house = person1.family_datum
+		new_sibling = person2
+		anchor_person = person1
 
 	if(!target_house)
 		target_house = new /datum/heritage(person2, null)
 		person2.family_datum = target_house
-		SSfamilytree.families += target_house
+		SSfamilytree.register_family(target_house)
 
-	var/datum/family_member/existing_member = person2.family_member_datum
+	var/datum/family_member/existing_member = anchor_person.family_member_datum
 	if(!existing_member)
 		return FALSE
 
 	var/datum/family_member/parent1 = existing_member.parents.len > 0 ? existing_member.parents[1] : null
 	var/datum/family_member/parent2 = existing_member.parents.len > 1 ? existing_member.parents[2] : null
+	if(!parent1)
+		var/datum/family_member/phantom_parent = new /datum/family_member(null, target_house)
+		phantom_parent.generation = -1
+		phantom_parent.phantom = TRUE
+		target_house.members += phantom_parent
+		existing_member.AddParent(phantom_parent)
+		parent1 = phantom_parent
 
-	target_house.AddToFamily(person1, parent1, parent2, FALSE)
-	return (person1.family_datum != null)
+	target_house.AddToFamily(new_sibling, parent1, parent2, FALSE)
+	return (new_sibling.family_datum == target_house)
 
 /datum/controller/subsystem/familytree/proc/evaluate_pair_negative_influence(mob/living/carbon/human/A, mob/living/carbon/human/B)
 	var/list/harmed_patrons = list()

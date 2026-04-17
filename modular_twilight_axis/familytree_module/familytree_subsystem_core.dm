@@ -90,6 +90,15 @@ SUBSYSTEM_DEF(familytree)
 	ftlog("=== /[tag] ===", FTLOG_INFO)
 #endif
 
+/datum/controller/subsystem/familytree/proc/register_family(datum/heritage/house)
+	if(!house)
+		return FALSE
+	if(house == ruling_family)
+		return TRUE
+	if(!(house in families))
+		families += house
+	return TRUE
+
 /datum/controller/subsystem/familytree/Initialize()
 	ftlog("Initialize() START")
 	ruling_family = new /datum/heritage(null, "Royal", /datum/species/human/northern)
@@ -317,6 +326,7 @@ SUBSYSTEM_DEF(familytree)
 	H.polygamy_mode = P.polygamy_mode
 	H.desired_relative_role = P.desired_relative_role
 	H.allow_low_status_marriage = P.allow_low_status_marriage
+	H.allow_relatives_in_family = P.allow_relatives_in_family
 	ftlog("try_queue: [H.real_name] pref=[H.familytree_pref] setspouse=[H.setspouse] role=[H.desired_relative_role]")
 	if(is_royal_suitor_job(job))
 		ftlog("try_queue STOP: [H.real_name] royal suitor job")

@@ -247,14 +247,14 @@ GLOBAL_DATUM_INIT(html_tags, /regex, regex(@"<.*?>", "g"))
 	if(mastermob)
 		mastermob.visible_message(span_warning("[mastermob] draws [masteritem]!"))
 
-/obj/item/rogueweapon/sword/zizo
+/obj/item/rogueweapon/sword/sabre/zizo
 	name = "cursed sword"
 	desc = "An cursed sword, which can steal life power"
 	icon = 'modular_twilight_axis/code/modules/roguetown/rogueantagonists/zizo_cult/sprites/zizo_weapone.dmi'
 	icon_state = "Zsword"
 	smeltresult = /obj/item/ingot/steel/zizo
 
-/obj/item/rogueweapon/sword/zizo/Initialize(mapload, ...)
+/obj/item/rogueweapon/sword/sabre/zizo/Initialize(mapload, ...)
 	. = ..()
 	AddComponent(/datum/component/cursed_item, TRAIT_CABAL, "SWORD")
 	AddElement(/datum/element/tipped_item)
@@ -285,13 +285,13 @@ GLOBAL_DATUM_INIT(html_tags, /regex, regex(@"<.*?>", "g"))
 	max_blade_int = 350
 	max_integrity = 300
 	possible_item_intents = list(/datum/intent/axe/cut, /datum/intent/axe/chop)
-	gripped_intents = list(/datum/intent/axe/cut/cult, /datum/intent/axe/chop/cult)
+	gripped_intents = list(/datum/intent/axe/cut/cult, /datum/intent/axe/chop/cult, /datum/intent/axe/bash/battle)
 	smeltresult = /obj/item/ingot/steel/zizo
 
 /datum/intent/axe/chop/cult
 	intent_intdamage_factor = 1.2
 	demolition_mod = 6
-	swingdelay = 9
+	swingdelay = 7
 	damfactor = 1.6
 
 /datum/intent/axe/cut/cult

@@ -998,6 +998,12 @@ GLOBAL_LIST_INIT(ritual_counters, list())
 		cavity.cavity_item = null
 	for(var/obj/item/bodypart/part as anything in target.bodyparts)
 		part.drop_limb()
+	if(target.has_status_effect(/datum/status_effect/debuff/ritualdefiled/cult))
+		to_chat(user, span_danger("Он уже выпотрошен"))
+		return
+	new /obj/item/natural/bundle/bone(center)
+	new /obj/item/natural/bundle/bone(center)
+	target.apply_status_effect(/datum/status_effect/debuff/ritualdefiled/cult)
 
 /* /datum/ritual/fleshcrafting/badomen
 	name = "Bad Omen"
@@ -1311,8 +1317,7 @@ GLOBAL_LIST_INIT(ritual_counters, list())
 	desk = "Призывает кинжал Зизо, который может содержать в себе яд."
 	center_requirement = /obj/item/rogueweapon/huntingknife/idagger
 
-	e_req = /obj/item/ingot/steel/zizo
-	w_req = /obj/item/ingot/steel/zizo
+	n_req = /obj/item/ingot/steel/zizo
 
 /datum/ritual/weaponary/zdagger/invoke(mob/living/user, turf/center)
 	var/datum/effect_system/spark_spread/S = new(center)
@@ -1344,8 +1349,7 @@ GLOBAL_LIST_INIT(ritual_counters, list())
 	desk = "Призывает особо-острый боевой топор."
 	center_requirement = /obj/item/rogueweapon/stoneaxe/handaxe
 	
-	e_req = /obj/item/ingot/steel/zizo
-	w_req = /obj/item/ingot/steel/zizo
+	n_req = /obj/item/ingot/steel/zizo
 
 /datum/ritual/weaponary/summonaxe/invoke(mob/living/user, turf/center)
 	var/datum/effect_system/spark_spread/S = new(center)
@@ -1360,15 +1364,14 @@ GLOBAL_LIST_INIT(ritual_counters, list())
 	desk = "Призывает меч, который ворует жизненную энергию."
 	center_requirement = /obj/item/rogueweapon/sword
 	
-	e_req = /obj/item/ingot/steel/zizo
-	w_req = /obj/item/ingot/steel/zizo
+	n_req = /obj/item/ingot/steel/zizo
 
-/datum/ritual/weaponary/summonaswordn/invoke(mob/living/user, turf/center)
+/datum/ritual/weaponary/summonasword/invoke(mob/living/user, turf/center)
 	var/datum/effect_system/spark_spread/S = new(center)
 	S.set_up(1, 1, center)
 	S.start()
 
-	new /obj/item/rogueweapon/sword/zizo(center)
+	new /obj/item/rogueweapon/sword/sabre/zizo(center)
 	playsound(get_turf(center), pick('sound/items/bsmith1.ogg','sound/items/bsmith2.ogg','sound/items/bsmith3.ogg','sound/items/bsmith4.ogg'), 100, FALSE)
 
 /datum/ritual/weaponary/summonshield

@@ -1,10 +1,10 @@
-/datum/advclass/mercenary/twilight_wandering_azurcaephan
+/datum/advclass/mercenary/imperial_spellblade
 	name = "Imperial Spellblade"
 	tutorial = "Зибантийские воины клинка и арканы ещё давным давно привлекли внимание Грензельхофта и вы, подражая и пародируя их манере, отточили свои навыки владения клинком и арканой в Имперской Академии Арканы в соответствии с учениями Зибантиийских орденов Нок, после чего отправились на большак зарабатывать средства к существованию за счёт применения своих незаурядных способностей."
 	allowed_sexes = list(MALE, FEMALE)
 	allowed_races = RACES_ALL_KINDS
 	allowed_patrons = list(/datum/patron/inhumen/zizo, /datum/patron/divine/noc)
-	outfit = /datum/outfit/job/roguetown/mercenary/twilight_wandering_azurcaephan
+	outfit = /datum/outfit/job/roguetown/mercenary/imperial_spellblade
 	maximum_possible_slots = 1 
 	class_select_category = CLASS_CAT_GRENZELHOFT
 	extra_context = "Этот класс наёмника имеет выбор между двумя стилями игры: через лёгкие доспехи с Dodge Expert или через средние доспехи с Maille Training."
@@ -31,10 +31,10 @@
 		"Armor Plates" = /obj/item/repair_kit/metal,
 	)
 
-/datum/outfit/job/roguetown/mercenary/twilight_wandering_azurcaephan
+/datum/outfit/job/roguetown/mercenary/imperial_spellblade
 	var/subclass_selected
 
-/datum/outfit/job/roguetown/mercenary/twilight_wandering_azurcaephan/Topic(href, href_list)
+/datum/outfit/job/roguetown/mercenary/imperial_spellblade/Topic(href, href_list)
 	. = ..()
 	if(href_list["subclass"])
 		subclass_selected = href_list["subclass"]
@@ -42,7 +42,7 @@
 		if(!subclass_selected)
 			subclass_selected = "blade"
 
-/datum/outfit/job/roguetown/mercenary/twilight_wandering_azurcaephan/pre_equip(mob/living/carbon/human/H)
+/datum/outfit/job/roguetown/mercenary/imperial_spellblade/pre_equip(mob/living/carbon/human/H)
 	..()
 	head = /obj/item/clothing/head/roguetown/roguehood
 	shoes = /obj/item/clothing/shoes/roguetown/boots/leather/reinforced

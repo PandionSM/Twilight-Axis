@@ -21,7 +21,7 @@
 	person?.dir = old_dir
 	person?.invisibility = old_invisibility
 
-/datum/family_member/proc/get_parent_members()
+/datum/family_member/proc/get_parent_members() as /list
 	var/list/out = list()
 	for(var/datum/family_member/p as anything in phantom_parent_members)
 		if(p)
@@ -37,7 +37,7 @@
 			out += pm
 	return out
 
-/datum/family_member/proc/get_child_members()
+/datum/family_member/proc/get_child_members() as /list
 	var/list/out = list()
 	for(var/datum/family_member/c as anything in phantom_child_members)
 		if(c)
@@ -53,7 +53,7 @@
 			out += cm
 	return out
 
-/datum/family_member/proc/get_spouse_members()
+/datum/family_member/proc/get_spouse_members() as /list
 	var/list/out = list()
 	if(!person)
 		return out
@@ -67,7 +67,7 @@
 			out += sm
 	return out
 
-/datum/family_member/proc/get_former_spouse_members()
+/datum/family_member/proc/get_former_spouse_members() as /list
 	var/list/out = list()
 	if(!person)
 		return out

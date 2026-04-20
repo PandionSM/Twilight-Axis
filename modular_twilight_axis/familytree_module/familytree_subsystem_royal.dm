@@ -30,18 +30,17 @@
 	if(duke_forced_hetero_mode(P))
 		return "consort"
 
-	switch(P.family)
-		if(FAMILY_NEWLYWED, FAMILY_NONE)
-			return "consort"
-		if(FAMILY_PARTIAL, FAMILY_FULL)
-			return "suitor"
+	if(familytree_pref_is_join(P.family) || familytree_pref_is_legacy_spouse(P.family))
+		return "suitor"
+	if(familytree_pref_is_create(P.family) || !familytree_pref_enabled(P.family))
+		return "consort"
 
 	return "consort"
 
 /datum/controller/subsystem/familytree/proc/duke_forced_hetero_mode(datum/preferences/P)
 	if(!P)
 		return FALSE
-	if(P.family != FAMILY_NONE)
+	if(familytree_pref_enabled(P.family))
 		return FALSE
 	return allow_nobles_in_ruling_family
 
@@ -380,7 +379,7 @@
 	if(!H || QDELETED(H) || H.family_datum)
 		return
 	H.familytree_assignment_scheduled = FALSE
-	if(H.familytree_pref != FAMILY_NONE)
+	if(familytree_pref_enabled(H.familytree_pref))
 		var/timer = rand(1, 10)
 		ftlog("ROYAL HAND FALLBACK: [H.real_name] normal pref=[H.familytree_pref] timer=[timer]s reason=[reason]")
 		H.familytree_assignment_scheduled = TRUE

@@ -365,7 +365,7 @@ SUBSYSTEM_DEF(familytree)
 		addtimer(CALLBACK(src, PROC_REF(run_royal_assignment), H, royal_status), get_royal_delay(H) SECONDS)
 		return
 
-	if(H.familytree_pref != FAMILY_NONE)
+	if(familytree_pref_enabled(H.familytree_pref))
 		var/timer = rand(1, 30) + 10
 		ftlog("try_queue LOCAL: [H.real_name] pref=[H.familytree_pref] timer=[timer]s")
 		H.familytree_assignment_scheduled = TRUE

@@ -43,6 +43,12 @@
 #define FAMILYTREE_MODULE_DEFINED_FAMILY_FULL
 #endif
 
+// Local runtime masks. Saved/global FAMILY_* values stay unchanged for compatibility.
+#define FAMILYTREE_MODE_DISABLED 0
+#define FAMILYTREE_MODE_JOIN (1<<0)
+#define FAMILYTREE_MODE_CREATE (1<<1)
+#define FAMILYTREE_MODE_LEGACY_SPOUSE (1<<2)
+
 #define ANY_GENDER 1
 #define SAME_GENDER 2
 #define DIFFERENT_GENDER 3

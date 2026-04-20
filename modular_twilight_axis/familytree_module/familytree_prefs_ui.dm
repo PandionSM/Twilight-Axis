@@ -30,6 +30,40 @@
 	var/tmp/familytree_setspouse_retries = 0
 	var/allow_relatives_in_family = TRUE
 
+/proc/familytree_pref_mask(pref)
+	switch(pref)
+		if(FAMILY_PARTIAL)
+			return FAMILYTREE_MODE_JOIN
+		if(FAMILY_NEWLYWED)
+			return FAMILYTREE_MODE_CREATE
+		if(FAMILY_FULL)
+			return FAMILYTREE_MODE_LEGACY_SPOUSE
+	return FAMILYTREE_MODE_DISABLED
+
+/proc/familytree_pref_enabled(pref)
+	return !!familytree_pref_mask(pref)
+
+/proc/familytree_pref_is_join(pref)
+	return !!(familytree_pref_mask(pref) & FAMILYTREE_MODE_JOIN)
+
+/proc/familytree_pref_is_create(pref)
+	return !!(familytree_pref_mask(pref) & FAMILYTREE_MODE_CREATE)
+
+/proc/familytree_pref_is_legacy_spouse(pref)
+	return !!(familytree_pref_mask(pref) & FAMILYTREE_MODE_LEGACY_SPOUSE)
+
+/proc/familytree_pref_uses_relative_role(pref)
+	var/mode = familytree_pref_mask(pref)
+	return !!(mode & (FAMILYTREE_MODE_JOIN | FAMILYTREE_MODE_CREATE))
+
+/proc/familytree_sanitize_pref(pref)
+	switch(familytree_pref_mask(pref))
+		if(FAMILYTREE_MODE_JOIN, FAMILYTREE_MODE_LEGACY_SPOUSE)
+			return FAMILY_PARTIAL
+		if(FAMILYTREE_MODE_CREATE)
+			return FAMILY_NEWLYWED
+	return FAMILY_NONE
+
 /proc/familytree_module_get_selectable_species() as /list
 	if(!GLOB.roundstart_races.len)
 		generate_selectable_species()
@@ -86,8 +120,7 @@
 
 /datum/preferences/proc/familytree_module_sanitize_character()
 	family = sanitize_integer(family, FAMILY_NONE, FAMILY_NEWLYWED, FAMILY_NONE)
-	if(family == FAMILY_FULL)
-		family = FAMILY_PARTIAL
+	family = familytree_sanitize_pref(family)
 	gender_choice_pref = sanitize_integer(gender_choice_pref, ANY_GENDER, DIFFERENT_GENDER, ANY_GENDER)
 	species_preference_mode = sanitize_text(species_preference_mode, "ANY")
 
@@ -126,7 +159,7 @@
 
 	polygamy_mode = sanitize_integer(polygamy_mode, POLYGAMY_DISABLED, POLYGAMY_ALLOW_BOTH, POLYGAMY_DISABLED)
 	desired_relative_role = sanitize_integer(desired_relative_role, RELATIVE_ANY, RELATIVE_SPOUSE, RELATIVE_ANY)
-	if(!(family in list(FAMILY_PARTIAL, FAMILY_NEWLYWED)))
+	if(!familytree_pref_uses_relative_role(family))
 		desired_relative_role = RELATIVE_ANY
 	allow_low_status_marriage = sanitize_integer(allow_low_status_marriage, 0, 1, 0)
 	allow_relatives_in_family = sanitize_integer(allow_relatives_in_family, 0, 1, TRUE)
@@ -351,10 +384,10 @@
 	return FALSE
 
 /datum/family_options/proc/_family_to_ui(val)
-	switch(val)
-		if(FAMILY_PARTIAL) return "member"
-		if(FAMILY_NEWLYWED) return "couple"
-		if(FAMILY_FULL) return "member"
+	if(familytree_pref_is_join(val) || familytree_pref_is_legacy_spouse(val))
+		return "member"
+	if(familytree_pref_is_create(val))
+		return "couple"
 	return "none"
 
 /datum/family_options/proc/_gender_to_ui(val)

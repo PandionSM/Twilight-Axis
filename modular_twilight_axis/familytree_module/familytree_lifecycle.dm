@@ -238,7 +238,7 @@
 		return
 	SSfamilytree.ftlog("MUTUAL CONFIRM: [person.real_name] cancelled (other side refused) type=[confirm_type]")
 	to_chat(person, span_warning("Другая сторона отказалась от вступления в семью. Ваш запрос отменён. Система попробует найти вам новую пару."))
-	if(!person.familytree_opted_out && !person.family_datum && !person.spouse_mob && person.familytree_pref && person.familytree_pref != FAMILY_NONE)
+	if(!person.familytree_opted_out && !person.family_datum && !person.spouse_mob && familytree_pref_enabled(person.familytree_pref))
 		person.familytree_assignment_scheduled = TRUE
 		addtimer(CALLBACK(SSfamilytree, TYPE_PROC_REF(/datum/controller/subsystem/familytree, run_local_assignment), person, person.familytree_pref), 10 SECONDS)
 

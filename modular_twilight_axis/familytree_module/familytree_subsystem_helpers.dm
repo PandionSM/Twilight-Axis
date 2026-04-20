@@ -285,15 +285,14 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 
 // Admin audit helpers are intentionally not guarded by FAMILYTREE_DEBUG_LOGGING.
 /datum/controller/subsystem/familytree/proc/familytree_pref_label(pref)
-	switch(pref)
-		if(FAMILY_NONE)
-			return "no family"
-		if(FAMILY_PARTIAL)
-			return "join family"
-		if(FAMILY_NEWLYWED)
-			return "create family"
-		if(FAMILY_FULL)
-			return "legacy full family"
+	if(familytree_pref_is_join(pref))
+		return "join family"
+	if(familytree_pref_is_create(pref))
+		return "create family"
+	if(familytree_pref_is_legacy_spouse(pref))
+		return "legacy spouse family"
+	if(!familytree_pref_enabled(pref))
+		return "no family"
 	return "unknown([pref])"
 
 /datum/controller/subsystem/familytree/proc/familytree_relative_pref_label(relative_role)

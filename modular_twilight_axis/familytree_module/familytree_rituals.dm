@@ -92,7 +92,7 @@
 		if(RELATIVE_UNCLE_AUNT)
 			AssignAuntUncle(H)
 		if(RELATIVE_SPOUSE)
-			if(H.familytree_pref == FAMILY_NEWLYWED)
+			if(familytree_pref_is_create(H.familytree_pref))
 				AssignNewlyWed(H)
 			else
 				AssignToFamily(H)

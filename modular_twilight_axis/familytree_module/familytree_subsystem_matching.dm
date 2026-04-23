@@ -1608,25 +1608,54 @@
 	H.familytree_assignment_scheduled = TRUE
 	addtimer(CALLBACK(src, PROC_REF(run_local_assignment), H, H.familytree_pref), 10 SECONDS)
 
-/datum/controller/subsystem/familytree/proc/introduce_pair(mob/living/carbon/human/A, mob/living/carbon/human/B)
-	if(!A || !B)
+/datum/controller/subsystem/familytree/proc/schedule_house_member_resync(datum/heritage/house, delay = 1 SECONDS, attempt = 1)
+	if(!house || QDELETED(house))
 		return
-	if(A.mind && B.mind)
-		A.mind.i_know_person(B)
-		B.mind.i_know_person(A)
-		fix_family_fjob(A, B)
-		fix_family_fjob(B, A)
-	else
-		addtimer(CALLBACK(src, PROC_REF(delayed_introduce_pair), A, B), 3 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(resync_house_members), house, attempt), delay)
 
-/datum/controller/subsystem/familytree/proc/delayed_introduce_pair(mob/living/carbon/human/A, mob/living/carbon/human/B)
+/datum/controller/subsystem/familytree/proc/resync_house_members(datum/heritage/house, attempt = 1)
+	if(!house || QDELETED(house))
+		return
+	var/list/people = list()
+	var/needs_retry = FALSE
+	for(var/datum/family_node/node as anything in house.member_nodes)
+		var/mob/living/carbon/human/H = node?.person
+		if(!H || QDELETED(H))
+			continue
+		people += H
+		if(!H.mind)
+			needs_retry = TRUE
+	for(var/i = 1 to people.len)
+		var/mob/living/carbon/human/A = people[i]
+		for(var/j = i + 1 to people.len)
+			var/mob/living/carbon/human/B = people[j]
+			introduce_pair(A, B)
+	if(needs_retry && attempt < 10)
+		schedule_house_member_resync(house, 3 SECONDS, attempt + 1)
+
+/datum/controller/subsystem/familytree/proc/introduce_pair(mob/living/carbon/human/A, mob/living/carbon/human/B, retry_count = 0)
+	if(!A || !B || A == B)
+		return
+	var/needs_retry = FALSE
+	if(A.mind)
+		A.mind.i_know_person(B)
+		if(B.mind)
+			fix_family_fjob(A, B)
+	else
+		needs_retry = TRUE
+	if(B.mind)
+		B.mind.i_know_person(A)
+		if(A.mind)
+			fix_family_fjob(B, A)
+	else
+		needs_retry = TRUE
+	if(needs_retry && retry_count < 10)
+		addtimer(CALLBACK(src, PROC_REF(delayed_introduce_pair), A, B, retry_count + 1), 3 SECONDS)
+
+/datum/controller/subsystem/familytree/proc/delayed_introduce_pair(mob/living/carbon/human/A, mob/living/carbon/human/B, retry_count = 1)
 	if(!A || QDELETED(A) || !B || QDELETED(B))
 		return
-	if(A.mind && B.mind)
-		A.mind.i_know_person(B)
-		B.mind.i_know_person(A)
-		fix_family_fjob(A, B)
-		fix_family_fjob(B, A)
+	introduce_pair(A, B, retry_count)
 
 /datum/controller/subsystem/familytree/proc/fix_family_fjob(mob/living/carbon/human/knower, mob/living/carbon/human/known)
 	if(!knower?.mind?.known_people || !known?.mind)

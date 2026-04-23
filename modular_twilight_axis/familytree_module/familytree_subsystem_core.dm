@@ -290,6 +290,8 @@ SUBSYSTEM_DEF(familytree)
 /datum/controller/subsystem/familytree/proc/on_human_login(mob/living/carbon/human/H)
 	SIGNAL_HANDLER
 	ftlog("on_human_login: [H?.real_name] ([H?.ckey]) client=[H?.client ? "yes" : "no"]")
+	if(H?.family_datum)
+		schedule_house_member_resync(H.family_datum)
 	try_queue_assignment(H)
 	addtimer(CALLBACK(src, PROC_REF(try_grant_holy_spells), H), 5 SECONDS)
 
@@ -323,6 +325,8 @@ SUBSYSTEM_DEF(familytree)
 /datum/controller/subsystem/familytree/proc/on_human_job_received(mob/living/carbon/human/H, rank)
 	SIGNAL_HANDLER
 	ftlog("on_human_job_received: [H?.real_name] ([H?.ckey]) rank=[rank]")
+	if(H?.family_datum)
+		schedule_house_member_resync(H.family_datum)
 	try_queue_assignment(H)
 	addtimer(CALLBACK(src, PROC_REF(try_grant_holy_spells), H), 2 SECONDS)
 
@@ -400,10 +404,8 @@ SUBSYSTEM_DEF(familytree)
 		return
 
 	if(familytree_pref_enabled(H.familytree_pref))
-		if(try_force_mutual_targeted_match(H))
-			ftlog("try_queue TARGETED: [H.real_name] matched via mutual target before local scheduling")
-			return
-		var/timer = rand(1, 30) + 10
+		var/target_name = familytree_get_target_name(H)
+		var/timer = (target_name && length(target_name)) ? 3 : (rand(1, 30) + 10)
 		ftlog("try_queue LOCAL: [H.real_name] pref=[H.familytree_pref] timer=[timer]s")
 		H.familytree_assignment_scheduled = TRUE
 		addtimer(CALLBACK(src, PROC_REF(run_local_assignment), H, H.familytree_pref), timer SECONDS)

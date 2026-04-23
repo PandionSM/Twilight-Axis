@@ -181,9 +181,11 @@
 	to_chat(cheater, span_warning("Вы опорочили Эору."))
 
 /datum/controller/subsystem/familytree/proc/on_family_formed(datum/heritage/house)
-	if(!house || storyteller_points_calculated)
+	if(!house)
 		return
-	recalculate_storyteller_for_house(house)
+	schedule_house_member_resync(house)
+	if(!storyteller_points_calculated)
+		recalculate_storyteller_for_house(house)
 
 /datum/controller/subsystem/familytree/proc/recalculate_storyteller_for_house(datum/heritage/house)
 	if(!house)

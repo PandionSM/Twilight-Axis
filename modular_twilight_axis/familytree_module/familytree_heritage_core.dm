@@ -194,6 +194,7 @@
 	IntroduceFamilyMember(person)
 	AddFamilyIcon(person)
 	LateJoinAddToUI(person)
+	SSfamilytree.schedule_house_member_resync(src)
 
 	return new_member
 
@@ -705,6 +706,9 @@
 		if(H && H.family_UI && H.client && H != new_fam)
 			if(new_fam in family_icons)
 				H.client.images.Add(family_icons[new_fam])
+		if(new_fam?.family_UI && new_fam.client && H && H != new_fam)
+			if(H in family_icons)
+				new_fam.client.images.Add(family_icons[H])
 
 /datum/heritage/proc/AddFamilyIcon(mob/living/carbon/human/famicon)
 	var/datum/family_member/member = GetFamilyMember(famicon)

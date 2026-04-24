@@ -262,6 +262,13 @@
 	var/datum/family_node/node_b = get_or_create_family_node(person_b, house)
 	return add_family_edge(node_a, node_b, "spouse", house, 0, "legacy_hook", FALSE)
 
+/datum/controller/subsystem/familytree/proc/graph_on_sworn_sibling_added(mob/living/carbon/human/person_a, mob/living/carbon/human/person_b, datum/heritage/house)
+	if(!person_a || !person_b || person_a == person_b)
+		return null
+	var/datum/family_node/node_a = get_or_create_family_node(person_a, house)
+	var/datum/family_node/node_b = get_or_create_family_node(person_b, house)
+	return add_family_edge(node_a, node_b, "sworn_sibling", house, 0, "legacy_hook", FALSE)
+
 /datum/controller/subsystem/familytree/proc/graph_on_spouse_removed(mob/living/carbon/human/person_a, mob/living/carbon/human/person_b, divorce = FALSE)
 	if(!person_a || !person_b)
 		return FALSE

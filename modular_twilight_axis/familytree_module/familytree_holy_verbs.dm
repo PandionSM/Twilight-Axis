@@ -263,7 +263,8 @@
 	if(!parent_member)
 		return FALSE
 
-	parent.family_datum.AddToFamily(child, parent_member, null, TRUE)
+	var/datum/family_member/coparent_member = familytree_get_ritual_adoptive_coparent(parent_member, child)
+	parent.family_datum.AddToFamily(child, parent_member, coparent_member, TRUE)
 	return (child.family_datum != null)
 
 /proc/familytree_holy_sibling(mob/living/carbon/human/person1, mob/living/carbon/human/person2)
@@ -287,19 +288,13 @@
 	if(!existing_member)
 		return FALSE
 
-	var/list/existing_parents = existing_member.get_parent_members()
-	var/datum/family_member/parent1 = existing_parents.len > 0 ? existing_parents[1] : null
-	var/datum/family_member/parent2 = existing_parents.len > 1 ? existing_parents[2] : null
-	if(!parent1)
-		var/datum/family_member/phantom_parent = new /datum/family_member(null, target_house)
-		phantom_parent.generation = -1
-		phantom_parent.phantom = TRUE
-		target_house.members += phantom_parent
-		existing_member.AddParent(phantom_parent)
-		parent1 = phantom_parent
+	var/datum/family_member/new_member = target_house.GetFamilyMember(new_sibling)
+	if(!new_member)
+		new_member = target_house.CreateFamilyMember(new_sibling)
+	if(!new_member)
+		return FALSE
 
-	target_house.AddToFamily(new_sibling, parent1, parent2, FALSE)
-	return (new_sibling.family_datum == target_house)
+	return new_member.AddSwornSibling(existing_member)
 
 /datum/controller/subsystem/familytree/proc/evaluate_pair_negative_influence(mob/living/carbon/human/A, mob/living/carbon/human/B)
 	var/list/harmed_patrons = list()

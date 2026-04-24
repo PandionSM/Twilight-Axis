@@ -467,16 +467,6 @@ SUBSYSTEM_DEF(familytree)
 		ftlog("run_local SKIP: [H.real_name] confirmation already pending")
 		H.familytree_assignment_scheduled = FALSE
 		return
-	var/busy_reason = is_familytree_player_busy(H)
-	if(busy_reason)
-		if(busy_attempt >= familytree_busy_retry_limit)
-			ftlog("run_local SKIP: [H.real_name] still busy ([busy_reason]) after [familytree_busy_retry_limit] retries", FTLOG_WARN)
-			H.familytree_assignment_scheduled = FALSE
-			return
-		ftlog("run_local DEFER: [H.real_name] busy=[busy_reason] retry=[busy_attempt + 1]/[familytree_busy_retry_limit]")
-		H.familytree_assignment_scheduled = TRUE
-		addtimer(CALLBACK(src, PROC_REF(run_local_assignment), H, effective_status, busy_attempt + 1), familytree_busy_retry_delay)
-		return
 	H.familytree_assignment_scheduled = FALSE
 	if(try_force_mutual_targeted_match(H))
 		ftlog("run_local TARGETED: [H.real_name] matched via mutual target before AddLocal")

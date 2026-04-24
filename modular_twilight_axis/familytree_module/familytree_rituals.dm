@@ -49,6 +49,17 @@
 
 	return SOCIAL_RANK_MID
 
+/proc/familytree_get_ritual_adoptive_coparent(datum/family_member/parent_member, mob/living/carbon/human/child)
+	if(!parent_member || !child)
+		return null
+	for(var/datum/family_member/spouse_member as anything in parent_member.get_spouse_members())
+		if(!spouse_member?.person || spouse_member.family != parent_member.family)
+			continue
+		if(!SSfamilytree.CanBeParentOf(spouse_member.person, child))
+			continue
+		return spouse_member
+	return null
+
 /proc/familytree_ritual_adopt(mob/living/carbon/human/parent, mob/living/carbon/human/child)
 	if(!parent || !child)
 		return FALSE
@@ -61,7 +72,8 @@
 	if(!parent_member)
 		return FALSE
 
-	parent.family_datum.AddToFamily(child, parent_member, null, TRUE)
+	var/datum/family_member/coparent_member = familytree_get_ritual_adoptive_coparent(parent_member, child)
+	parent.family_datum.AddToFamily(child, parent_member, coparent_member, TRUE)
 	return TRUE
 
 /proc/familytree_vampire_bind(mob/living/carbon/human/sire, mob/living/carbon/human/progeny)
@@ -90,7 +102,7 @@
 		if(RELATIVE_CHILD)
 			AssignToHouse(H, "child")
 		if(RELATIVE_UNCLE_AUNT)
-			AssignAuntUncle(H)
+			AssignToHouse(H, "uncle_aunt")
 		if(RELATIVE_SPOUSE)
 			if(familytree_pref_is_create(H.familytree_pref))
 				AssignNewlyWed(H)

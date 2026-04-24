@@ -117,18 +117,6 @@
 
 	ApplyBoundForceMultiplier()
 
-/datum/component/combo_core/ronin/proc/_turf_blocks_ronin_movement(turf/T)
-	if(!T || T.density)
-		return TRUE
-
-	for(var/atom/movable/A in T)
-		if(A == owner)
-			continue
-		if(A.density)
-			return TRUE
-
-	return FALSE
-
 // ------------------------------------------------------------
 // combo rules
 // ------------------------------------------------------------
@@ -725,14 +713,14 @@
 		d = owner.dir
 
 	var/turf/t1 = get_step(start, d)
-	if(!t1 || _turf_blocks_ronin_movement(t1))
+	if(!t1 || _turf_is_dash_blocked(t1))
 		return
 
 	owner.forceMove(t1)
 	_RonSlashOnTurf(t1, force, zone)
 
 	var/turf/t2 = get_step(t1, d)
-	if(!t2 || _turf_blocks_ronin_movement(t2))
+	if(!t2 || _turf_is_dash_blocked(t2))
 		return
 
 	owner.forceMove(t2)

@@ -2202,6 +2202,13 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/clothing/cloak/matron
 	donatitem = TRUE
 
+/datum/loadout_item/donator/wyrd_cloak
+	name = "Wyrd Cloak"
+	category = list("Плащи", "Донат")
+	path = /obj/item/clothing/suit/roguetown/armor/longcoat/wyrd_cloak
+	donatitem = TRUE
+	donat_tier = 2
+
 /datum/loadout_item/donat/capeblkknight
 	name = "Кровавая мантия"
 	category = list("Плащи", "Донат")

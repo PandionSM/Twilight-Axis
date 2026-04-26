@@ -161,15 +161,15 @@
 					choose = /obj/item/reagent_containers/powder/ozium
 				if("Moon Dust x3")
 					choose = /obj/item/reagent_containers/powder/moondust
-				if("Purified Moondust")
+				if("Purified Moondust x2")
 					choose = /obj/item/reagent_containers/powder/moondust_purest
-					count = 1
-				if("Spice")
+					count = 2
+				if("Spice x2")
 					choose = /obj/item/reagent_containers/powder/spice
-					count = 1
-				if("Herozium")
+					count = 2
+				if("Herozium x2")
 					choose = /obj/item/reagent_containers/powder/herozium
-					count = 1
+					count = 2
 				if("Smartium x3")
 					choose = /obj/item/reagent_containers/powder/smartium
 				if("Grave Powder x3")
@@ -186,15 +186,15 @@
 					choose = /obj/item/reagent_containers/glass/bottle/rogue/whitewine
 				if("Elven Red x3")
 					choose = /obj/item/reagent_containers/glass/bottle/rogue/elfred
-				if("Valmora Blue")
+				if("Valmora Blue x2")
 					choose = /obj/item/reagent_containers/glass/bottle/rogue/elfblue
-					count = 1
-				if("Aged Spiced Wine")
+					count = 2
+				if("Aged Spiced Wine x2")
 					choose = /obj/item/reagent_containers/glass/bottle/rogue/spicedwineaged
-					count = 1
-				if("Delectable Spiced Wine")
+					count = 2
+				if("Delectable Spiced Wine x2")
 					choose = /obj/item/reagent_containers/glass/bottle/rogue/spicedwinedelectable
-					count = 1
+					count = 2
 			for(var/i=1, i <= count, i++)
 				new choose (get_turf(src))
 				playsound(src, 'sound/magic/mending.ogg', 35, TRUE, -2)

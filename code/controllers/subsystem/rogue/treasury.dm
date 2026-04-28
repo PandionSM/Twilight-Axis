@@ -467,7 +467,6 @@ SUBSYSTEM_DEF(treasury)
 
 	if(!silent && amt >= EXPORT_ANNOUNCE_THRESHOLD) // Only announce big spending.
 		scom_announce("[SSticker.realm_name] exports [D.name] for [amt] mammon.")
-	D.lower_demand()
 
 	return amt
 
@@ -650,6 +649,18 @@ SUBSYSTEM_DEF(treasury)
 	if(!amt)
 		return FALSE
 	return burn(discretionary_fund, amt, "withdrawn by [target]")
+
+/datum/controller/subsystem/treasury/proc/give_money_treasury(amt, source = "Treasury income")
+	if(!amt)
+		return FALSE
+	if(amt > 0)
+		return mint(discretionary_fund, amt, source)
+	return burn(discretionary_fund, abs(amt), source)
+
+/datum/controller/subsystem/treasury/proc/log_to_steward(msg)
+	if(!msg)
+		return
+	log_game("STEWARD LOG: [msg]")
 
 /datum/controller/subsystem/treasury/proc/get_poll_tax_category(mob/living/H)
 	if(!H)

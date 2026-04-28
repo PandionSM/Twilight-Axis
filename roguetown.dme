@@ -3699,6 +3699,7 @@
 #include "modular_twilight_axis\code\modules\roguetown\roguejobs\alchemist\reagents.dm"
 #include "modular_twilight_axis\code\modules\roguetown\roguejobs\blacksmith\anvil_recipes\armor.dm"
 #include "modular_twilight_axis\code\modules\roguetown\roguejobs\blacksmith\anvil_recipes\tools.dm"
+#include "modular_twilight_axis\code\modules\roguetown\roguejobs\mages\enchanting_scrolls.dm"
 #include "modular_twilight_axis\code\modules\roguetown\roguemachine\ATM.dm"
 #include "modular_twilight_axis\code\modules\roguetown\roguemachine\blackmarket.dm"
 #include "modular_twilight_axis\code\modules\roguetown\roguemachine\bounty.dm"
@@ -3725,6 +3726,7 @@
 #include "modular_twilight_axis\code\modules\spell\spell_types\wizard\projectiles_single\magic_icicle.dm"
 #include "modular_twilight_axis\code\modules\spell\spell_types\wizard\buffs_debuffs\shrink.dm"
 #include "modular_twilight_axis\code\modules\spells\spell.dm"
+#include "modular_twilight_axis\code\modules\spells\spell_cooldown.dm"
 #include "modular_twilight_axis\code\modules\spells\soundbreaker.dm"
 #include "modular_twilight_axis\code\modules\spells\ronin.dm"
 #include "modular_twilight_axis\code\modules\spells\pantheon\divine\astrata.dm"
@@ -3797,4 +3799,5 @@
 #include "modular_twilight_axis\lore\code\tips\time.dm"
 #include "modular_twilight_axis\modular\Neu_food\code\cookware\cup.dm"
 #include "modular_twilight_axis\code\datums\flaws\gefheretic.dm"
+#include "modular_twilight_axis\code\datums\magic_items\mythical_items\mythic.dm"
 // END_INCLUDE

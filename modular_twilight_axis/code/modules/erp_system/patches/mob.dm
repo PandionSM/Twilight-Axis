@@ -174,6 +174,7 @@
 	. = ..()
 	client?.prefs?.apply_erp_kinks_to_mob(src)
 	SSerp.apply_prefs_for_mob(src)
+	erp_resync_after_body_restore()
 
 /obj/item/bodypart/head/dullahan/MiddleMouseDrop_T(atom/movable/dragged, mob/living/user)
 	if(user.mmb_intent)
@@ -432,3 +433,50 @@
 
 	EC.open_ui(actor)
 	return EC
+
+/mob/living/proc/erp_resync_after_body_restore()
+	if(!SSerp)
+		return
+
+	var/client/C = client
+
+	var/datum/erp_controller/EC = null
+	if(C)
+		EC = SSerp.get_controller_for_client(C)
+
+	if(!EC)
+		EC = SSerp.get_controller_for(src)
+
+	if(EC)
+		EC.rebind_owner(src, C, src)
+
+		if(EC.owner)
+			EC.owner.attach_client(C)
+			EC.owner.set_effect_mob(src)
+			EC.owner.mark_organs_dirty()
+			EC.owner.rebuild_organs()
+
+		for(var/datum/erp_actor/A as anything in EC.actors)
+			if(!A || QDELETED(A))
+				continue
+
+			if(A.active_actor == src || A.physical == src || A.get_signal_mob() == src)
+				A.attach_client(C)
+				A.set_effect_mob(src)
+				A.mark_organs_dirty()
+				A.rebuild_organs()
+
+		EC.request_ui_update()
+
+	SSerp.apply_prefs_for_mob(src)
+	SEND_SIGNAL(src, COMSIG_ERP_ANATOMY_CHANGED)
+
+/obj/effect/proc_holder/spell/invoked/resurrect/cast(list/targets, mob/living/user)
+	. = ..()
+
+	if(!. || !length(targets))
+		return
+
+	if(isliving(targets[1]))
+		var/mob/living/target = targets[1]
+		target.erp_resync_after_body_restore()

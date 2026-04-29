@@ -871,3 +871,9 @@
 
 		A2.mark_organs_dirty()
 		C2.ui?.request_update()
+
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		var/obj/item/organ/penis/penis = H.getorganslot(ORGAN_SLOT_PENIS)
+		if(penis)
+			penis.refresh_sex_organ()

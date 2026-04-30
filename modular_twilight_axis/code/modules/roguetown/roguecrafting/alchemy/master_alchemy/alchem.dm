@@ -198,7 +198,7 @@
 	switch(upgrade_level)
 		if(1) req_text = "Требуется: 1 Железный слиток (положите в склад стола)"
 		if(2) req_text = "Требуется: 1 Золотой слиток (положите в склад стола)"
-		if(3) req_text = "Требуется: 1 Алмаз (положите в склад стола)"
+		if(3) req_text = "Требуется: 1 Алмаз, 1 Загадка Стали, 2 Синих самоцвета, 4 Огненной пыли 2 чистых люкса (положите в склад стола)"
 	data["next_upgrade_req"] = req_text
 
 
@@ -495,49 +495,62 @@
 
 		if("upgrade")
 			if(!STR) return TRUE
+			if(upgrade_level >= 4) return TRUE
 			
-			if(upgrade_level >= 4)
-				return TRUE
+			var/list/requirements = list()
+			switch(upgrade_level)
+				if(1)
+					requirements[/obj/item/ingot/iron] = 1
+				if(2)
+					requirements[/obj/item/ingot/gold] = 1
+				if(3)
+					requirements[/obj/item/roguegem/diamond] = 1
+					requirements[/obj/item/riddleofsteel] = 1
+					requirements[/obj/item/roguegem/blue] = 2
+					requirements[/obj/item/alch/firedust] = 4
+					requirements[/obj/item/reagent_containers/lux] = 2
+
+
+			var/list/items_to_consume = list()
+			var/has_everything = TRUE
 			
-			var/upgraded = FALSE
-			
-			if(upgrade_level == 1)
-				var/obj/item/ingot/iron/I = locate() in STR.real_location()
-				if(I)
+			for(var/req_type in requirements)
+				var/needed_amount = requirements[req_type]
+				var/found_amount = 0
+				
+
+				for(var/obj/item/I in STR.real_location())
+					if((I.type == req_type) && !(I in items_to_consume))
+						items_to_consume += I
+						found_amount++
+						if(found_amount >= needed_amount)
+							break
+
+				if(found_amount < needed_amount)
+					has_everything = FALSE
+					break
+
+			if(has_everything)
+				for(var/obj/item/I in items_to_consume)
 					STR.remove_from_storage(I, null)
 					qdel(I)
-					upgrade_level = 2
-					to_chat(user, span_notice("Вы усилили котел железными креплениями!"))
-					upgraded = TRUE
-				else
-					to_chat(user, span_warning("Вам нужен Железный слиток внутри склада лаборатории!"))
 
-			else if(upgrade_level == 2)
-				var/obj/item/ingot/gold/G = locate() in STR.real_location()
-				if(G)
-					STR.remove_from_storage(G, null)
-					qdel(G)
-					upgrade_level = 3
-					to_chat(user, span_notice("Вы установили золотые змеевики. Теперь доступна Инфузия!"))
-					upgraded = TRUE
-				else
-					to_chat(user, span_warning("Вам нужен Золотой слиток внутри склада лаборатории!"))
-					
-			else if(upgrade_level == 3)
-				var/obj/item/roguegem/diamond/D = locate() in STR.real_location()
-				if(D)
-					STR.remove_from_storage(D, null)
-					qdel(D)
-					upgrade_level = 4
-					to_chat(user, span_notice("Вы встроили Алмазную Линзу. Лаборатория достигла пика могущества!"))
-					upgraded = TRUE
-				else
-					to_chat(user, span_warning("Вам нужен Алмаз внутри склада лаборатории!"))
-
-			if(upgraded)
-				update_icon_state()
+				upgrade_level++
 				update_icon()
 				
+				var/msg = ""
+				if(upgrade_level == 2) msg = "Вы укрепили стол железными креплениями. Доступна Лаборатория!"
+				if(upgrade_level == 3) msg = "Вы установили золотые змеевики. Теперь доступна Инфузия!"
+				if(upgrade_level == 4) msg = "Вы встроили Призматическую Линзу. Лаборатория достигла пика могущества!"
+				to_chat(user, span_notice(msg))
+			else
+				var/req_text = ""
+				switch(upgrade_level)
+					if(1) req_text = "1 Железный слиток"
+					if(2) req_text = "1 Золотой слиток"
+					if(3) req_text = "1 Алмаз, 1 Загадка Стали, 2 Синих самоцвета, 4 Огненной пыли 2 чистых люкса."
+				to_chat(user, span_warning("Не хватает компонентов! Требуется: [req_text]."))
+
 			return TRUE
 
 		if("mix")

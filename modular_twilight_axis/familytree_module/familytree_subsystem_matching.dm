@@ -1189,15 +1189,14 @@
 	if(respect_xylix && xylix_roulette_applies(creator))
 		return null
 
-	var/datum/preferences/P = creator.client?.prefs
-	if(!P)
-		return null
-
 	var/creator_type = creator.dna.species.type
 	var/partner_type = partner.dna.species.type
-	var/list/pref_types = get_preference_species_type_list(P)
+	var/list/pref_types = get_familytree_species_type_list(creator.preferred_species_types)
+	var/species_mode = creator.species_preference_mode
+	if(!species_mode)
+		species_mode = "ANY"
 
-	switch(P.species_preference_mode)
+	switch(species_mode)
 		if("ANY")
 			;
 		if("SAME_TYPE")
@@ -1207,7 +1206,7 @@
 			if(!(partner_type in pref_types))
 				return "species mismatch"
 
-	if(!AnatomyCompatible(P.preferred_species_anatomy, partner))
+	if(!AnatomyCompatible(creator.preferred_species_anatomy, partner))
 		return "anatomy mismatch"
 
 	return null

@@ -238,6 +238,9 @@ SUBSYSTEM_DEF(familytree)
 	H.familytree_pref = P.family
 	H.gender_choice_pref = P.gender_choice_pref
 	H.setspouse = P.setspouse
+	H.species_preference_mode = P.species_preference_mode
+	H.preferred_species_types = islist(P.preferred_species_types) ? P.preferred_species_types.Copy() : list()
+	H.preferred_species_anatomy = P.preferred_species_anatomy
 	H.polygamy_mode = P.polygamy_mode
 	H.desired_relative_role = P.desired_relative_role
 	H.allow_low_status_marriage = P.allow_low_status_marriage

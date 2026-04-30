@@ -4,7 +4,7 @@
 // #include "modular_twilight_axis\familytree_module\familytree_module_config.dm"
 //
 // --- FILE MAP ---
-// familytree_prefs_ui.dm            - prefs vars, runtime mirrors, savefile load/save/sanitize, family_options TGUI backend
+// familytree_prefs_ui.dm            - prefs vars, runtime mirrors, character savefile load/save/sanitize, family_options TGUI backend
 // familytree_mob_procs.dm           - MarryTo, player verbs, known families, UI toggles, open-preferences entry
 // familytree_heritage_core.dm       - /datum/heritage: house, members, marriage, species calc, display build
 // familytree_member.dm              - /datum/family_member: graph-facing accessors, relation terms, GetRelationshipTo, phantom links

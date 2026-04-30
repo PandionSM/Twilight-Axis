@@ -17,6 +17,9 @@
 	var/image/spouse_indicator
 	var/setspouse
 	var/gender_choice_pref = ANY_GENDER
+	var/species_preference_mode = "ANY"
+	var/list/preferred_species_types = list()
+	var/preferred_species_anatomy = 0
 	var/familytree_pref = FAMILY_NONE
 	var/datum/heritage/family_datum
 	var/datum/family_member/family_member_datum
@@ -113,7 +116,42 @@
 
 /datum/preferences/proc/familytree_module_get_cd(slot)
 	slot = familytree_module_get_slot(slot)
-	return "/familytree_module/character[slot]"
+	return "/character[slot]"
+
+/datum/preferences/proc/familytree_module_save_key_map() as /list
+	var/static/list/key_map
+	if(!key_map)
+		key_map = list(
+			"family" = "family",
+			"gender_choice_pref" = "gender_choice_pref",
+			"setspouse" = "setspouse",
+			"species_preference_mode" = "species_preference_mode",
+			"preferred_species_types" = "preferred_species_types",
+			"preferred_species_anatomy" = "preferred_species_anatomy",
+			"polygamy_mode" = "polygamy_mode",
+			"desired_relative_role" = "desired_relative_role",
+			"allow_low_status_marriage" = "allow_low_status_marriage",
+			"allow_relatives_in_family" = "allow_relatives_in_family",
+		)
+	return key_map
+
+/datum/preferences/proc/familytree_module_read_savefile(savefile/S)
+	if(!S)
+		return FALSE
+	var/list/key_map = familytree_module_save_key_map()
+	for(var/save_key in key_map)
+		var/var_name = key_map[save_key]
+		S[save_key] >> vars[var_name]
+	return TRUE
+
+/datum/preferences/proc/familytree_module_write_savefile(savefile/S)
+	if(!S)
+		return FALSE
+	var/list/key_map = familytree_module_save_key_map()
+	for(var/save_key in key_map)
+		var/var_name = key_map[save_key]
+		WRITE_FILE(S[save_key], vars[var_name])
+	return TRUE
 
 /datum/preferences/proc/familytree_module_reset_character()
 	family = initial(family)
@@ -194,17 +232,24 @@
 	if(path && fexists(path))
 		var/savefile/S = new /savefile(path)
 		if(S)
-			S.cd = familytree_module_get_cd(slot)
-			S["family"] >> family
-			S["gender_choice_pref"] >> gender_choice_pref
-			S["setspouse"] >> setspouse
-			S["species_preference_mode"] >> species_preference_mode
-			S["preferred_species_types"] >> preferred_species_types
-			S["preferred_species_anatomy"] >> preferred_species_anatomy
-			S["polygamy_mode"] >> polygamy_mode
-			S["desired_relative_role"] >> desired_relative_role
-			S["allow_low_status_marriage"] >> allow_low_status_marriage
-			S["allow_relatives_in_family"] >> allow_relatives_in_family
+			familytree_module_load_character_from_savefile(S, slot, force)
+
+	familytree_module_sanitize_character()
+	familytree_module_loaded_slot = slot
+	familytree_module_loaded_path = path
+	return TRUE
+
+/datum/preferences/proc/familytree_module_load_character_from_savefile(savefile/S, slot, force = FALSE)
+	slot = familytree_module_get_slot(slot)
+	if(!force && (familytree_module_loaded_path == path) && (familytree_module_loaded_slot == slot))
+		return TRUE
+
+	familytree_module_reset_character()
+
+	if(S)
+		S.cd = familytree_module_get_cd(slot)
+		if(S["family"])
+			familytree_module_read_savefile(S)
 
 	familytree_module_sanitize_character()
 	familytree_module_loaded_slot = slot
@@ -223,16 +268,21 @@
 		return FALSE
 
 	S.cd = familytree_module_get_cd(slot)
-	WRITE_FILE(S["family"], family)
-	WRITE_FILE(S["gender_choice_pref"], gender_choice_pref)
-	WRITE_FILE(S["setspouse"], setspouse)
-	WRITE_FILE(S["species_preference_mode"], species_preference_mode)
-	WRITE_FILE(S["preferred_species_types"], preferred_species_types)
-	WRITE_FILE(S["preferred_species_anatomy"], preferred_species_anatomy)
-	WRITE_FILE(S["polygamy_mode"], polygamy_mode)
-	WRITE_FILE(S["desired_relative_role"], desired_relative_role)
-	WRITE_FILE(S["allow_low_status_marriage"], allow_low_status_marriage)
-	WRITE_FILE(S["allow_relatives_in_family"], allow_relatives_in_family)
+	familytree_module_write_savefile(S)
+
+	familytree_module_loaded_slot = slot
+	familytree_module_loaded_path = path
+	return TRUE
+
+/datum/preferences/proc/familytree_module_save_character_to_savefile(savefile/S, slot)
+	if(!S)
+		return FALSE
+
+	slot = familytree_module_get_slot(slot)
+	familytree_module_sanitize_character()
+
+	S.cd = familytree_module_get_cd(slot)
+	familytree_module_write_savefile(S)
 
 	familytree_module_loaded_slot = slot
 	familytree_module_loaded_path = path

@@ -66,16 +66,19 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 	if(a_xylix && b_xylix)
 		return null
 
-	var/datum/preferences/PA = A.client?.prefs
-	var/datum/preferences/PB = B.client?.prefs
-
 	var/typeA = A.dna.species.type
 	var/typeB = B.dna.species.type
-	var/list/pref_types_a = get_preference_species_type_list(PA)
-	var/list/pref_types_b = get_preference_species_type_list(PB)
+	var/list/pref_types_a = get_familytree_species_type_list(A.preferred_species_types)
+	var/list/pref_types_b = get_familytree_species_type_list(B.preferred_species_types)
+	var/mode_a = A.species_preference_mode
+	var/mode_b = B.species_preference_mode
+	if(!mode_a)
+		mode_a = "ANY"
+	if(!mode_b)
+		mode_b = "ANY"
 
-	if(PA && !a_xylix)
-		switch(PA.species_preference_mode)
+	if(!a_xylix)
+		switch(mode_a)
 			if("ANY")
 				;
 			if("SAME_TYPE")
@@ -85,8 +88,8 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 				if(!(typeB in pref_types_a))
 					return "species mismatch"
 
-	if(PB && !b_xylix)
-		switch(PB.species_preference_mode)
+	if(!b_xylix)
+		switch(mode_b)
 			if("ANY")
 				;
 			if("SAME_TYPE")
@@ -96,12 +99,12 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 				if(!(typeA in pref_types_b))
 					return "species mismatch"
 
-	if(PA && !a_xylix)
-		if(!AnatomyCompatible(PA.preferred_species_anatomy, B))
+	if(!a_xylix)
+		if(!AnatomyCompatible(A.preferred_species_anatomy, B))
 			return "anatomy mismatch"
 
-	if(PB && !b_xylix)
-		if(!AnatomyCompatible(PB.preferred_species_anatomy, A))
+	if(!b_xylix)
+		if(!AnatomyCompatible(B.preferred_species_anatomy, A))
 			return "anatomy mismatch"
 
 	return null
@@ -338,17 +341,18 @@ GLOBAL_LIST_INIT(familytree_title_prefixes, list(
 	return "unknown([polygamy_pref])"
 
 /datum/controller/subsystem/familytree/proc/familytree_species_pref_summary(mob/living/carbon/human/H)
-	var/datum/preferences/P = H?.client?.prefs
-	if(!P)
-		return "species=no prefs"
+	if(!H)
+		return "species=no mob"
 
-	var/mode = P.species_preference_mode || "ANY"
+	var/mode = H.species_preference_mode
+	if(!mode)
+		mode = "ANY"
 	var/species_text = "species_mode=[mode]"
 	if(mode == "SPECIFIC_TYPE")
-		var/list/species_names = islist(P.preferred_species_types) ? P.preferred_species_types : list()
+		var/list/species_names = islist(H.preferred_species_types) ? H.preferred_species_types : list()
 		var/specific_species_text = species_names.len ? species_names.Join(", ") : "none"
 		species_text += "; species=[specific_species_text]"
-	species_text += "; anatomy=[P.preferred_species_anatomy]"
+	species_text += "; anatomy=[H.preferred_species_anatomy]"
 	return species_text
 
 /datum/controller/subsystem/familytree/proc/familytree_search_summary(mob/living/carbon/human/H)

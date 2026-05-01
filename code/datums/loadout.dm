@@ -224,9 +224,8 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 
 /datum/loadout_item/burgerhood
 	name = "Noble Hood"
-	category = list("Головные уборы", "Донат")
+	category = "Головные уборы"
 	path = /obj/item/clothing/head/roguetown/roguehood/burgerhood
-	donatitem = TRUE
 
 /datum/loadout_item/gasa
 	name = "Gasa"

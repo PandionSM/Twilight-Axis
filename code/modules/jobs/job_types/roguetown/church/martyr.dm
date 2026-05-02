@@ -193,6 +193,11 @@
 				to_chat(H, span_warn("It burns and sizzles! It does not tolerate my pallid flesh!"))
 				H.dropItemToGround(parent)
 				return
+			if(H.real_name in GLOB.excommunicated_players)
+				if(ispath(H.patron?.type, /datum/patron/divine))
+					to_chat(H, span_warning("It slips from my grasp. I can't get a hold."))
+					H.dropItemToGround(parent)
+					return
 			var/datum/job/J = SSjob.GetJob(H.mind?.assigned_role)
 			if(J.title != "Martyr" && J.title != "Bishop")		//Can't be a Martyr if you're not a Martyr. Or a Bishop.
 				to_chat(H, span_warn("It slips from my grasp. I can't get a hold."))
@@ -476,7 +481,7 @@
 	give_bank_account = TRUE
 
 	cmode_music = 'sound/music/combat_martyrsafe.ogg'
-	job_traits = list(TRAIT_HEAVYARMOR, TRAIT_STEELHEARTED, TRAIT_SILVER_BLESSED, TRAIT_EMPATH, TRAIT_MEDICINE_EXPERT, TRAIT_DUALWIELDER, TRAIT_CLERGY, TRAIT_TEMPO, TRAIT_MARRIAGE_CAPABLE)
+	job_traits = list(TRAIT_HEAVYARMOR, TRAIT_STEELHEARTED, TRAIT_SILVER_BLESSED, TRAIT_EMPATH, TRAIT_MEDICINE_EXPERT, TRAIT_DUALWIELDER, TRAIT_CLERGY, TRAIT_TEMPO)
 
 	//No undeath-adjacent virtues for a role that can sacrifice itself. The Ten like their sacrifices 'pure'. (I actually didn't want to code returning those virtue traits post-sword use)
 	//They get those traits during sword activation, anyway.

@@ -33,8 +33,13 @@
 	//How many players have this job
 	var/current_positions = 0
 
+	/// Admin-manual slot override set via Manage Job Slots for storyteller-capped roles.
+	var/admin_slot_override = FALSE
+
 	//Whether this job clears a slot when you get a rename prompt.
 	var/antag_job = FALSE
+	var/storyteller_antag_flags = STORYTELLER_ANTAG_NONE
+	var/storyteller_midround_antag_flags = STORYTELLER_ANTAG_NONE
 
 	//Supervisors, who this person answers to directly
 	var/supervisors = ""
@@ -62,9 +67,6 @@
 	//The amount of good boy points playing this role will earn you towards a higher chance to roll antagonist next round
 	//can be overridden by antag_rep.txt config
 	var/antag_rep = 10
-
-	var/paycheck = PAYCHECK_MINIMAL
-	var/paycheck_department = ACCOUNT_CIV
 
 	var/display_order = JOB_DISPLAY_ORDER_DEFAULT
 
@@ -150,6 +152,7 @@
 
 	var/list/virtue_restrictions
 	var/list/vice_restrictions
+	var/list/origin_requirement //TA EDIT
 
 	///The job's stats
 	var/list/job_stats
@@ -170,11 +173,32 @@
 	var/is_quest_giver = FALSE
 
 	/// How many quests this job can take at once
-	var/max_active_quests = 3
+	// TEMP: bumped from 2 to 12 for writ-system testing - revert before merge.
+	var/max_active_quests = 12
+
+	var/townie_contract_gate_exempt = FALSE
+
+/// Either flag exempts. Job-level is "this whole job has no town rotation" (Adventurer,
+/// Mercenary, Vagabond, Court Agent). Advclass-level is "this specific subclass deserves
+/// the exemption within an otherwise non-exempt job" (Hunter / Witch / Levy / Thug under
+/// Pilgrim). Pilgrim/Blacksmith etc. land at FALSE on both sides.
+/proc/is_townie_contract_gate_exempt(mob/user)
+	if(!user?.mind)
+		return FALSE
+	var/datum/job/J = user.job ? SSjob.GetJob(user.job) : null
+	if(J?.townie_contract_gate_exempt)
+		return TRUE
+	var/datum/advclass/AC = user.mind.picked_advclass
+	if(!QDELETED(AC) && AC.townie_contract_gate_exempt)
+		return TRUE
+	return FALSE
 
 
 /datum/job/proc/special_job_check(mob/dead/new_player/player)
 	return TRUE
+
+/datum/job/proc/uses_storyteller_slot_caps()
+	return title in list("Wretch", "Gnoll", "Assassin")
 
 /datum/job/proc/validate_prefs_for_job(datum/preferences/P) //TA EDIT START
 	if(!P) return FALSE
@@ -190,7 +214,10 @@
 		for(var/datum/charflaw/cf in P.charflaws)
 			if(cf.type in vice_restrictions)
 				return FALSE
-				
+
+	if(length(origin_requirement) && !(P.virtue_origin?.type in origin_requirement))
+		return FALSE
+
 	return TRUE //TA EDIT END
 
 /datum/job/proc/get_used_title(mob/player)
@@ -282,7 +309,7 @@
 
 		if(noble_income)
 			SStreasury.noble_incomes[H] = noble_income
-			SStreasury.give_money_account(noble_income, H, "Noble Estate")
+			SStreasury.grant_estate_income(H, noble_income, TRUE)
 
 	if(show_in_credits)
 		SScrediticons.processing += H
@@ -378,11 +405,6 @@
 		if((H.dna.species.id != "human") && (H.dna.species.id != "humen"))
 			H.set_species(/datum/species/human)
 			H.apply_pref_name("human", preference_source)
-	if(!visualsOnly)
-		var/datum/bank_account/bank_account = new(H.real_name, src)
-		bank_account.payday(STARTING_PAYCHECKS, TRUE)
-		H.account_id = bank_account.account_id
-
 	//Equip the rest of the gear
 	H.dna.species.before_equip_job(src, H, visualsOnly)
 	if(!outfit_override && visualsOnly && visuals_only_outfit)
@@ -564,6 +586,13 @@
 					for(var/stat in adv_ref.adv_stat_ceiling)
 						dat += "["[capitalize(stat)]: <b>\Roman[adv_ref.adv_stat_ceiling[stat]]</b>"] | "
 					dat += "<i><br>Regardless of your statpacks or race choice, you will not be able to exceed these stats on spawn.</i></font>"
+				if(length(adv_ref.origin_limits)) //TA EDIT START
+					dat += "["<br><font color = '#cf2a2a'><b>This subclass requires one of the following origins: "]</b></font><br>"
+					dat += " | "
+					for(var/orig in adv_ref.origin_limits)
+						var/datum/virtue/origin/origin = orig
+						dat += "[origin.name] | "
+					dat += "<i><br>Choosing this subclass with any other origin will enforce a compatiable origin on spawn.</i></font>" //TA EDIT END
 				if(LAZYLEN(adv_ref.subclass_mage_aspects))
 					var/list/aspect_cfg = adv_ref.subclass_mage_aspects
 					dat += "<font color = '#a3a7e0'><b>Mage Aspects:</b><br>"

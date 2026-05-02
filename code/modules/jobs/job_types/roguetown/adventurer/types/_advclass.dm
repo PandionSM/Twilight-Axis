@@ -3,6 +3,8 @@
 	var/list/classes
 	var/outfit
 	var/tutorial = "Choose me!"
+	var/townie_contract_gate_exempt = FALSE
+	var/townie_contract_gate_hide_in_list = FALSE
 	/// Subclass-specific tutorial shown via to_chat on spawn, separate from the class-picker tutorial.
 	var/subclass_tutorial
 	var/list/allowed_sexes
@@ -64,6 +66,7 @@
 
 	var/list/virtue_limits = list()
 	var/list/vice_limits = list()
+	var/list/origin_limits = list() //TA EDIT
 
 	var/datum/class_age_mod/age_mod = null
 
@@ -103,6 +106,7 @@
 
 	if(noble_income)
 		SStreasury.noble_incomes[H] = noble_income
+		SStreasury.grant_estate_income(H, noble_income, TRUE)
 
 	if(adaptive_name)
 		H.adaptive_name = TRUE
@@ -149,6 +153,34 @@
 	addtimer(CALLBACK(H,TYPE_PROC_REF(/mob/living/carbon/human, add_credit), TRUE), 20)
 	if(cmode_music)
 		H.cmode_music = cmode_music
+
+	if(length(origin_limits) && H.client) //TA EDIT START
+		var/correlation = FALSE
+		for(var/origintype in origin_limits)
+			if(istype(H.client.prefs?.virtue_origin, origintype))
+				correlation = TRUE
+		if(!correlation)
+			var/datum/virtue/origin/first_origin = origin_limits[1]
+			to_chat(H, span_warning("I've spent so many daes in [first_origin.origin_name] that I've come to call it my home."))
+			change_origin(H, first_origin)
+
+/datum/advclass/proc/change_origin(mob/living/carbon/human/H, new_origin = /datum/virtue/none, wording)
+	var/client/player = H?.client
+	if(player?.prefs)
+		var/datum/virtue/origin/origin_memory = player.prefs.virtue_origin
+		player.prefs.virtue_origin = new new_origin
+		if(wording)
+			H.dna.species.skin_tone_wording = wording
+		player.prefs.virtue_origin.last_origin = origin_memory
+		player.prefs.virtue_origin.apply_to_human(H)
+		if(length(player.prefs.virtue_origin.added_languages))
+			for(var/L in player.prefs.virtue_origin.added_languages)
+				H.grant_language(L)
+		if(length(player.prefs.virtue_origin.last_origin.added_languages))
+			for(var/L in player.prefs.virtue_origin.last_origin.added_languages)
+				if(L != player.prefs.extra_language)
+					H.remove_language(L)
+		H.grant_language(player.prefs.extra_language)  //TA EDIT END
 
 /*
 	Whoa! we are checking requirements here!

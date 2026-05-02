@@ -830,6 +830,7 @@
 /obj/item/clothing/suit/roguetown/shirt/dress/maidfancy
 	name = "maid dress"
 	desc = "A dress befitting the housekeeper of a lord's staff. While not as intricate as a royal's, it is indicative of the house's status."
+	slot_flags = ITEM_SLOT_ARMOR|ITEM_SLOT_SHIRT
 	body_parts_covered = CHEST|GROIN|ARMS|VITALS
 	sleeved = 'icons/roguetown/clothing/special/onmob/sleeves_maids.dmi'
 	r_sleeve_status = SLEEVE_NORMAL
@@ -854,3 +855,15 @@
 	icon_state = "butlershirt"
 	item_state = "butlershirt"
 	sleeved = 'icons/roguetown/clothing/special/onmob/sleeves_maids.dmi'
+/obj/item/clothing/suit/roguetown/shirt/velvetdress
+	name = "velvet dress"
+	desc = "A garment made with embroidered velvet, both elegant and warm. Poetry made manifest in swaying fabric."
+	icon_state = "velvetdress"
+	item_state = "velvetdress"
+	sleeved = 'icons/roguetown/clothing/onmob/helpers/sleeves_shirts.dmi'
+/obj/item/clothing/suit/roguetown/shirt/nobledress
+	name = "noble's pinafore"
+	desc = "A comfortable dress adapted from simpler garments often worn by working-class women."
+	icon_state = "nobledress"
+	item_state = "nobledress"
+	sleeved = 'icons/roguetown/clothing/onmob/helpers/sleeves_shirts.dmi'

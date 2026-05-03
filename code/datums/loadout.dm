@@ -224,9 +224,8 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 
 /datum/loadout_item/burgerhood
 	name = "Noble Hood"
-	category = list("Головные уборы", "Донат")
+	category = "Головные уборы"
 	path = /obj/item/clothing/head/roguetown/roguehood/burgerhood
-	donatitem = TRUE
 
 /datum/loadout_item/gasa
 	name = "Gasa"
@@ -507,7 +506,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 /datum/loadout_item/sleevedtabard
 	name = "Tabard, Sleeved"
 	category = "Плащи"
-	path = /obj/item/clothing/cloak/tabard/sleevedtabard
+	path = /obj/item/clothing/cloak/sleevedtabard
 
 //SHOES
 /datum/loadout_item/darkboots
@@ -686,6 +685,12 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	category = "Одежда"
 	path = /obj/item/clothing/under/roguetown/tights/explorerpants
 
+/datum/loadout_item/formaltrousers
+	name = "Formal Trousers"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/under/roguetown/tights/formalfancy
+	donatitem = TRUE
+
 /datum/loadout_item/bottomtunic
 	name = "Low-cut Tunic"
 	category = "Одежда"
@@ -785,6 +790,30 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Bared Robe"
 	category = "Одежда"
 	path = /obj/item/clothing/suit/roguetown/shirt/robe/bared
+
+/datum/loadout_item/velvetdress
+	name = "Velvet Dress"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/velvetdress
+	donatitem = TRUE
+
+/datum/loadout_item/nobledress
+	name = "Noble's Pinafore"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/nobledress
+	donatitem = TRUE
+
+/datum/loadout_item/formalshirt
+	name = "formal shirt"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/undershirt/formal
+	donatitem = TRUE
+
+/datum/loadout_item/fancymaiddress
+	name = "maid dress"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/dress/maidfancy
+	donatitem = TRUE
 
 //PANTS
 /datum/loadout_item/tights
@@ -1069,32 +1098,32 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 
 /datum/loadout_item/psicross/gronnzizo
 	name = "Wolf Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/inhumen/gronn
 
 /datum/loadout_item/psicross/gronnbaotha
 	name = "Leopard Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/inhumen/baothagronn
 
 /datum/loadout_item/psicross/gronnmatthios
 	name = "Bear Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/inhumen/matthios/gronn
 
 /datum/loadout_item/psicross/gronngraggar
 	name = "Moose Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/inhumen/graggar/gronn
 
 /datum/loadout_item/psicross/gronndendor
 	name = "Volfskinned Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/dendor/gronn
 
 /datum/loadout_item/psicross/gronnabyssor
 	name = "Hadal Talisman"
-	category = list("Аксессуары", "Донат")
+	category = list("Аксессуары")
 	path = /obj/item/clothing/neck/roguetown/psicross/abyssor/gronn
 
 /datum/loadout_item/wedding_band
@@ -1536,6 +1565,26 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/enchantingkit/weapon/aeternum
 	donatitem = TRUE
 
+/datum/loadout_item/donator/darling
+	name = "Donator Item - Darling - Required: Longsword"
+	category = list("Оружие", "Донат")
+	path = /obj/item/enchantingkit/weapon/darling
+	donatitem = TRUE
+	donat_tier = 2
+
+/datum/loadout_item/donator/sumquoderis
+	name = "Donator Item - Sum Quod Eris - Required: Executioners sword"
+	category = list("Оружие", "Донат")
+	path = /obj/item/enchantingkit/weapon/sumquoderis
+	donatitem = TRUE
+	donat_tier = 2
+
+/datum/loadout_item/donator/euthanasia
+	name = "Donator Item - Euthanasia - Required: Dagger or Seax"
+	category = list("Оружие", "Донат")
+	path = /obj/item/enchantingkit/weapon/euthanasia
+	donatitem = TRUE
+
 /*
 /datum/loadout_item/donator_zydrasiconocrown
 	name = "Donator Kit - Iconoclast Crown - Required: Barred Helmet(Only men, no small races)"
@@ -1654,12 +1703,14 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/rogueweapon/scabbard/sword/royal/donat
 	category = list("Оружие", "Донат")
 	donatitem = TRUE
+	donat_tier = 1
 
 /datum/loadout_item/donat_sheathroyal
 	name = "Decorated Sheath, Golden"
 	path = /obj/item/rogueweapon/scabbard/sheath/royal/donat
 	category = list("Оружие", "Донат")
 	donatitem = TRUE
+	donat_tier = 1
 
 /datum/loadout_item/donat_gildedshirt
 	name = "Gilded Dress Shirt"
@@ -1973,6 +2024,13 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	donatitem = TRUE
 	donat_tier = 2
 
+/datum/loadout_item/donator/dark_delight
+	name = "Donator Item - Dark Delight - Required: Ssangsudo or Longsword"
+	path = /obj/item/enchantingkit/weapon/nicksonessang
+	category = list("Оружие", "Донат")
+	donatitem = TRUE
+	donat_tier = 2
+
 // Разное
 /datum/loadout_item/donat
 	name = "Музыкальная коробка"
@@ -2181,6 +2239,13 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	category = list("Плащи", "Донат")
 	path = /obj/item/clothing/cloak/matron
 	donatitem = TRUE
+
+/datum/loadout_item/donator/wyrd_cloak
+	name = "Wyrd Cloak"
+	category = list("Плащи", "Донат")
+	path = /obj/item/clothing/suit/roguetown/armor/longcoat/wyrd_cloak
+	donatitem = TRUE
+	donat_tier = 2
 
 /datum/loadout_item/donat/capeblkknight
 	name = "Кровавая мантия"
@@ -2632,6 +2697,13 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	donatitem = TRUE
 	donat_tier = 2
 
+/datum/loadout_item/donator/ketrai
+	name = "Octopus hat"
+	path = /obj/item/clothing/head/roguetown/octopus
+	category = list("Головные уборы", "Донат")
+	donatitem = TRUE
+	donat_tier = 2	
+
 // Обувь
 
 /datum/loadout_item/hammerhold_shoes
@@ -2771,7 +2843,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	donat_tier = 2
 
 /datum/loadout_item/donator_her_verdict
-	name = "Donator Kit - Her Verdict - Required: Kriegmesser"
+	name = "Donator Kit - Her Verdict - Required: Kriegmesser or Longsword"
 	category = list("Оружие", "Донат")
 	path = /obj/item/enchantingkit/weapon/herverdict
 	donatitem = TRUE
@@ -2792,7 +2864,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	donatitem = TRUE
 
 /datum/loadout_item/donator_koruu_kukri_warden
-	name = "Donator Kit - Warden Leachwhacker - Required: Warden's Seax"
+	name = "Donator Kit - Warden Leachwhacker - Required: Warden's Seax or Any Dagger"
 	category = list("Оружие", "Донат")
 	path = /obj/item/enchantingkit/weapon/koruu_kukri/warden
 	donatitem = TRUE
@@ -2938,3 +3010,128 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	donat_ignore = list("namenlos66")
 
 // Sanguine Kits End
+
+// Nightmare Kit Start
+
+/datum/loadout_item/donator_nightmare_armet
+	name = "Donator Kit - Nightmare Tears Helmet - Required: Armet"
+	category = list("Броня", "Донат")
+	path = /obj/item/enchantingkit/nightmare_armet
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+/datum/loadout_item/donator_nightmare_scales
+	name = "Donator Kit - Nightmare Tears Scales - Required: Scalemail (Only Woman, No Small Races)"
+	category = list("Броня", "Донат")
+	path = /obj/item/enchantingkit/nightmare_scales
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+/datum/loadout_item/donator_nightmare_gauntlets
+	name = "Donator Kit - Nightmare Tears Gauntlets - Required: Plate Gauntlets (Only Woman, No Small Races)"
+	category = list("Броня", "Донат")
+	path = /obj/item/enchantingkit/nightmare_gauntlets
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+/datum/loadout_item/donator_nightmare_chausses
+	name = "Donator Kit - Nightmare Tears Chausses - Required: Steel Chain Chausses (Only Woman, No Small Races)"
+	category = list("Броня", "Донат")
+	path = /obj/item/enchantingkit/nightmare_chausses
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+/datum/loadout_item/donator_nightmare_boots
+	name = "Donator Kit - Nightmare Tears Boots - Required: Steel Boots"
+	category = list("Броня", "Донат")
+	path = /obj/item/enchantingkit/nightmare_boots
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+/datum/loadout_item/donator_nightmare_crown
+	name = "Donator Kit - Nightmare Tears Crown"
+	category = list("Головные уборы", "Донат")
+	path = /obj/item/clothing/head/roguetown/nightmare_crown
+	donatitem = TRUE
+	ckeywhitelist = list("wrvxth", "murken4ik")
+
+// Nightmare Kit End
+
+// Etruscan vol.3 Kit Start
+
+/datum/loadout_item/etrhat
+	name = "Wanderer's hat"
+	category = list("Головные уборы", "Донат")
+	path = /obj/item/clothing/head/roguetown/duelhat/etrhat
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrdress
+	name = "Low-cut dress - (only female, no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/dress/etrdress
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrdress2
+	name = "Embroidered dress - (only female, no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/dress/etrdress2
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrshirt
+	name = "Low-cut shirt - (only female, no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/undershirt/etrshirt
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrdoublet
+	name = "Wanderer's doublet - (only male, no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/undershirt/etrdoublet
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrjacket
+	name = "Wanderer's jacket - (no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/armor/leather/etrjacket
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrbootsm
+	name = "Wanderer's boots - (only male, no small races)"
+	category = list("Обувь", "Донат")
+	path = /obj/item/clothing/shoes/roguetown/boots/leather/etrbootsm
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/donat/etrcape
+	name = "Wanderer's cape - (no small races)"
+	category = list("Плащи", "Донат")
+	path = /obj/item/clothing/cloak/etrcape
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/fancymaidapron
+	name = "Fancy Maid Apron"
+	category = list("Плащи", "Донат")
+	path = /obj/item/clothing/cloak/apron/waist/fancymaid
+	donatitem = TRUE
+
+/datum/loadout_item/donat/etrpants
+	name = "Wanderer's pants - (no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/under/roguetown/trou/leather/etrpants
+	donatitem = TRUE
+	donat_tier = 1
+
+/datum/loadout_item/etrdress3
+	name = "Strapless gown - (only female, no small races)"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/dress/etrdress3
+	donatitem = TRUE
+	donat_tier = 1
+// Etruscan vol.3 Kit End

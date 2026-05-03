@@ -133,6 +133,35 @@
 	wdefense = 4
 	sellprice = 10
 
+/obj/item/rogueweapon/sword/zizo
+	name = "avantyne arming sword"
+	desc = "The cardinal sin, coalesced into a crystalline crucifix. In Her name, your will shall be projected unto the worshippers of lesser gods; and by your \
+	hand, they shall bend the knee to progress."
+	icon_state = "zeretic_arming"
+	sheathe_icon = "zeretic_arming"
+	force = 25
+	force_wielded = 30
+	smeltresult = /obj/item/ingot/component/zizo
+
+/obj/item/rogueweapon/sword/zizo/Initialize()
+	. = ..()
+	AddComponent(/datum/component/cursed_item, TRAIT_CABAL, "SWORD")
+
+/obj/item/rogueweapon/sword/avantyne
+	name = "avantyne-threaded arming sword"
+	desc = "Anger and spite, channeled into a blade that defies both wisdom and purity. Seldom does such power come without a price, however; are you ready to pay it?"
+	icon_state = "zeretic_arming"
+	sheathe_icon = "zeretic_arming"
+	possible_item_intents = list(/datum/intent/sword/cut/arming, /datum/intent/sword/thrust/short, /datum/intent/sword/strike)
+	gripped_intents = list(/datum/intent/sword/cut/arming, /datum/intent/sword/thrust/arming, /datum/intent/sword/strike)
+	force = 25
+	force_wielded = 30
+	max_blade_int = 300
+	max_integrity = 300
+	equip_delay_self = 0
+	unequip_delay_self = 0
+	smeltresult = /obj/item/ingot/avantyne
+
 /obj/item/rogueweapon/sword/long
 	name = "longsword"
 	desc = "A lethal and perfectly balanced weapon. The longsword is the protagonist of endless tales and myths \
@@ -345,7 +374,7 @@
 	desc = "A masterfully smithed, perfectly-balanced longsword that makes it easy for even a beginner to perform basic fencing maneuvers."
 	icon_state = "germanlong"
 	max_blade_int = 275
-	possible_item_intents = list(/datum/intent/sword/cut, /datum/intent/sword/thrust/long, /datum/intent/dagger/sucker_punch, /datum/intent/sword/bash)
+	possible_item_intents = list(/datum/intent/sword/cut, /datum/intent/sword/thrust/long, /datum/intent/dagger/sucker_punch, SWORD_STRIKE)
 	gripped_intents = list(/datum/intent/sword/cut, /datum/intent/sword/thrust/long, /datum/intent/sword/thrust/long/halfsword/lesser, /datum/intent/sword/chop)
 	wlength = WLENGTH_NORMAL
 
@@ -354,16 +383,33 @@
 	desc = "A wicked, unconventional, and otherwordly blade that was created by no swordsmith - a manifestation of hate for the state of this world that follows no design principles but spite and anger."
 	icon_state = "zizosword"
 	sheathe_icon = "zizosword"
-	force = 30
-	force_wielded = 35
+	force = 35
+	force_wielded = 40
 	max_blade_int = 400
 	max_integrity = 500
 	equip_delay_self = 0
 	unequip_delay_self = 0
+	wdefense_wbonus = 7
+	smeltresult = /obj/item/ingot/component/zizo
 
 /obj/item/rogueweapon/sword/long/zizo/Initialize()
 	. = ..()
 	AddComponent(/datum/component/cursed_item, TRAIT_CABAL, "SWORD")
+
+/obj/item/rogueweapon/sword/long/avantyne
+	name = "avantyne-threaded longsword"
+	desc = "A parasitic mandate to progress, borne through the cultivation of crystalline metastasis. This otherworldly blade is stronger and sharper than any \
+	mortal-made masterwork, yet comes at a cost that has yet to be realized."
+	icon_state = "zizolongsword"
+	sheathe_icon = "zizolongsword"
+	force = 30
+	force_wielded = 35
+	max_blade_int = 400
+	max_integrity = 400
+	equip_delay_self = 0
+	unequip_delay_self = 0
+	wdefense_wbonus = 5
+	smeltresult = /obj/item/ingot/avantyne
 
 /obj/item/rogueweapon/sword/long/heirloom
 	name = "old longsword"
@@ -409,6 +455,16 @@
 	static_price = TRUE
 	max_integrity = 999
 	max_blade_int = 9999
+
+/obj/item/rogueweapon/sword/long/judgement/ascendant/tester
+	name = "DEBUG TEST SWORD - DO NOT USE IN ROUND"
+	desc = "A ridiculous admin-spawn test weapon that one-shots anything. If you are holding this in a real round, something has gone badly wrong."
+	force = 999
+	force_wielded = 999
+	max_integrity = 999
+	max_blade_int = 9999
+	sellprice = 0
+	static_price = TRUE
 
 /obj/item/rogueweapon/sword/long/judgement/vlord
 	name = "\"Ichor Fang\""
@@ -1231,7 +1287,7 @@
 	inhand_y_dimension = 64
 	dropshrink = 0.75
 	max_blade_int = 230
-	possible_item_intents = list(/datum/intent/sword/thrust/rapier, /datum/intent/sword/thrust/rapier/lunge, /datum/intent/sword/cut/rapier)
+	possible_item_intents = list(/datum/intent/sword/thrust/rapier, /datum/intent/sword/cut/rapier, /datum/intent/sword/thrust/rapier/lunge)
 	gripped_intents = null
 	special = /datum/special_intent/piercing_lunge
 	parrysound = list(
@@ -1340,11 +1396,12 @@
 	damfactor = 1.3
 	penfactor = PEN_BSTEEL
 
-	swingdelay_type = SWINGDELAY_CANCEL
+	swingdelay_type = SWINGDELAY_CANCELSLOW
 	canparry = FALSE
 	candodge = FALSE
 
 	swingdelay = 0.8 SECONDS
+	clickcd = 1.5 SECONDS
 
 /obj/item/rogueweapon/sword/rapier/dec
 	name = "decorated rapier"
@@ -1803,15 +1860,19 @@
 	name = "ruma hwando"
 	desc = "A foreign steel single-edged sword with cloud patterns on the groove. The Ruma Clan's insignia is engraved on the blade."
 	icon_state = "eastsword2"
+	force = 27
+	max_integrity = 200
+	sharpness_mod = 2
+	sellprice = 50
 
 /obj/item/rogueweapon/sword/sabre/mulyeog/rumacaptain
-	force = 30
 	name = "samjeongdo"
 	desc = "A gold-stained sword with cloud patterns on the groove. One of a kind. It is a symbol of status within the Ruma clan."
 	icon_state = "eastsword3"
-	max_integrity = 180
+	force = 27
+	max_integrity = 200
 	sharpness_mod = 2
-	wdefense = 4
+	sellprice = 150
 
 /obj/item/rogueweapon/sword/sabre/hook
 	force = 20
@@ -2127,3 +2188,21 @@
 	sellprice = 50
 	sheathe_icon = "elfsword"
 	max_blade_int = 300
+
+//Banded iron sword that I don't want to chuck in the middle of the file again
+/obj/item/rogueweapon/sword/short/iron/banded
+	name = "banded iron sword"
+	desc = "A rather heavy slab of iron for separating brigands from their ill-gotten gold. It's extremely heavy and only really allows cutting, yet it swings surprisingly fast - at the cost of force output."
+	icon_state = "bandedsword"
+	possible_item_intents = list(
+		/datum/intent/sword/cut/short/banded,
+		/datum/intent/sword/chop/powerstrike
+		)
+	wdefense = 4
+	minstr = 10
+	force = 7	//This sword gets its real damage values from its intents. IYKYK.
+	sellprice = 25
+	blade_int = 350	//You're gonna cut. A lot.
+	max_integrity = 110	//Iron arming sword + 10
+	pickup_sound = 'sound/foley/equip/scrap_equip.ogg'
+	equip_sound = 'sound/foley/equip/scrap_equip.ogg'

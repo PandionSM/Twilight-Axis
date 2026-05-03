@@ -25,9 +25,9 @@
 	var/misfire_chance = 0
 	/// Reload time, in SECONDS
 	var/reload_time = 8
-	damfactor = 0.8
+	damfactor = 1
 	var/critfactor = 0.7
-	var/npcdamfactor = 2
+	var/npcdamfactor = 4
 
 /obj/item/gun/ballistic/revolver/grenadelauncher/twilight_runelock/getonmobprop(tag)
 	. = ..()
@@ -226,7 +226,7 @@
 	return chargetime
 
 /obj/item/gun/ballistic/revolver/grenadelauncher/twilight_runelock/rifle
-	name = "Doomsdae"
+	name = "\"Doomsdae\""
 	desc = "Реликвия новой эпохи, созданная для войны, что положит конец истории мироздания, какой мы её знаем. Изготовленная отаванскими мастерами артефакторики, и зачарованная рунными магами Отавы, эта руническая винтовка - оружие, что сокрушит легионы тьмы в Конце Времен. Руны нанесены на ствол оружия кровью еретиков, поплатившихся за свое предательство истинной веры своими жизнями."
 	icon = 'modular_twilight_axis/firearms/icons/runelock_rifle.dmi'
 	icon_state = "runelock"

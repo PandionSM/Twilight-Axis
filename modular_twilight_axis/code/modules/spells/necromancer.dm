@@ -179,9 +179,20 @@
 	target.visible_message(span_warning("[target.real_name]'s eyes light up with an evil glow!"))
 	to_chat(target, span_userdanger("My master is [master.real_name]. I must obey [master.p_them()] as long as [master.p_they()] live."))
 
+/datum/advclass/wretch/necromancer
+	outfit = /datum/outfit/job/roguetown/wretch/necromancer/twilight_axis
+
+/datum/outfit/job/roguetown/wretch/necromancer/twilight_axis/pre_equip(mob/living/carbon/human/H)
+	. = ..()
+	if(backpack_contents)
+		backpack_contents -= /obj/item/necro_relics/necro_crystal
+	else
+		backpack_contents = list()
+	backpack_contents[/obj/item/necro_relics/necro_crystal/twilight_axis] = 1
+
 /obj/item/necro_relics/necro_crystal/Initialize(mapload)
 	. = ..()
-	if(type != /obj/item/necro_relics/necro_crystal || !loc)
+	if(type != /obj/item/necro_relics/necro_crystal || !isturf(loc))
 		return .
 	var/obj/item/necro_relics/necro_crystal/twilight_axis/replacement = new /obj/item/necro_relics/necro_crystal/twilight_axis(loc)
 	replacement.copy_necro_crystal_state_from(src)

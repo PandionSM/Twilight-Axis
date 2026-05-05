@@ -36,7 +36,9 @@
 		var/message = "The depths are hollow."
 		if(user.cmode)
 			message += " A decrepit skeleton rises instead."
-			backup_summon(T)
+			// TA EDIT
+			backup_summon(T, user)
+			// TA EDIT END
 		to_chat(user, span_warning(message))
 		return TRUE
 
@@ -59,12 +61,20 @@
 	target.mind.AddSpell(new /obj/effect/proc_holder/spell/self/suicidebomb/lesser)
 	return TRUE
 
-/obj/effect/proc_holder/spell/invoked/raise_undead/proc/backup_summon(var/turf/T)
+// TA EDIT
+/obj/effect/proc_holder/spell/invoked/raise_undead/proc/backup_summon(var/turf/T, mob/living/user = null)
 	var/skeleton_roll = rand(1, 3)
+	var/mob/living/skeleton_new
 	// 66% chance of medium 33% of heavy
 	switch(skeleton_roll)
 		if(1 to 2) // 66% chance
-			new /mob/living/carbon/human/species/skeleton/npc/medium(T)
+			skeleton_new = new /mob/living/carbon/human/species/skeleton/npc/medium(T)
 		if(3) // 33% chance
-			new /mob/living/carbon/human/species/skeleton/npc/hard(T)
+			skeleton_new = new /mob/living/carbon/human/species/skeleton/npc/hard(T)
+	if(skeleton_new && user)
+		if(user.mind?.current)
+			skeleton_new.summoner = user.mind.current.real_name
+		else
+			skeleton_new.summoner = user.name
 	return TRUE
+// TA EDIT END

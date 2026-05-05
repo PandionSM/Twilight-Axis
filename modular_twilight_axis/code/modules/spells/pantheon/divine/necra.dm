@@ -2,6 +2,7 @@
 #define TRANQUILITY_SHROUD_APPLY_TIME 2 SECONDS
 #define TRANQUILITY_SHROUD_FORGET_RANGE 12
 #define TRANQUILITY_SHROUD_AI_TARGET_SIGNAL "mob_ai_target_check"
+#define TRANQUILITY_SHROUD_FILTER "tranquility_shroud_glow"
 #define TRANQUILITY_SHROUD_REMOVAL_AGGRESSION "aggression"
 #define TRANQUILITY_SHROUD_REMOVAL_UNDEAD_ATTACK "undead_attack"
 
@@ -87,10 +88,11 @@
 
 /datum/status_effect/tranquility_shroud
 	id = "tranquility_shroud"
-	alert_type = null
+	alert_type = /atom/movable/screen/alert/status_effect/buff/tranquility_shroud
 	duration = TRANQUILITY_SHROUD_DURATION
 	status_type = STATUS_EFFECT_UNIQUE
 	on_remove_on_mob_delete = TRUE
+	var/outline_colour = "#a0a0a0"
 	var/removal_reason
 	var/holy_skill = 0
 	var/datum/weakref/caster_ref
@@ -105,11 +107,14 @@
 	if(!owner || QDELETED(owner) || owner.stat != CONSCIOUS || (owner.mob_biotypes & MOB_UNDEAD) || owner.mind?.has_antag_datum(/datum/antagonist/zombie))
 		return FALSE
 	owner.AddElement(/datum/element/tranquility_shroud)
+	if(!owner.get_filter(TRANQUILITY_SHROUD_FILTER))
+		owner.add_filter(TRANQUILITY_SHROUD_FILTER, 2, list("type" = "outline", "color" = outline_colour, "alpha" = 120, "size" = 2))
 	return TRUE
 
 /datum/status_effect/tranquility_shroud/on_remove()
 	if(owner && !QDELETED(owner))
 		owner.RemoveElement(/datum/element/tranquility_shroud)
+		owner.remove_filter(TRANQUILITY_SHROUD_FILTER)
 		if(removal_reason == TRANQUILITY_SHROUD_REMOVAL_AGGRESSION || removal_reason == TRANQUILITY_SHROUD_REMOVAL_UNDEAD_ATTACK)
 			to_chat(owner, span_warning("The tranquil shroud tears away. The dead remember me."))
 		else
@@ -127,6 +132,12 @@
 /datum/status_effect/tranquility_shroud/proc/on_shroud_broken_by_undead(mob/living/undead_source)
 	// TODO: Apprentice+ scaling hook for a mild holy debuff once boss/resistance rules are settled.
 	return
+
+/atom/movable/screen/alert/status_effect/buff/tranquility_shroud
+	name = "Shroud of Tranquility"
+	desc = "A solemn stillness lingers over me. Lesser dead may briefly forget my name."
+	icon = 'modular_twilight_axis/icons/mob/actions/necra_shroud.dmi'
+	icon_state = "shroud_tranquility"
 
 /datum/element/tranquility_shroud
 
@@ -254,6 +265,8 @@
 		return FALSE
 	if(stat == DEAD)
 		return FALSE
+	if(is_player_raised_undead())
+		return FALSE
 	if(istype(src, /mob/living/simple_animal/hostile/boss))
 		return FALSE
 	if(istype(src, /mob/living/carbon/human/species/skeleton/npc/special))
@@ -263,6 +276,17 @@
 	if(!ai_controller && !istype(src, /mob/living/simple_animal/hostile))
 		return FALSE
 	return TRUE
+
+/mob/living/proc/is_player_raised_undead()
+	if(summoner)
+		return TRUE
+	if(faction)
+		if(FACTION_CABAL in faction)
+			return TRUE
+		for(var/faction_name as anything in faction)
+			if(istext(faction_name) && findtext(faction_name, "_faction"))
+				return TRUE
+	return FALSE
 
 /mob/living/proc/can_undead_see_target(mob/living/target)
 	if(!target || QDELETED(target))
@@ -297,5 +321,6 @@
 #undef TRANQUILITY_SHROUD_APPLY_TIME
 #undef TRANQUILITY_SHROUD_FORGET_RANGE
 #undef TRANQUILITY_SHROUD_AI_TARGET_SIGNAL
+#undef TRANQUILITY_SHROUD_FILTER
 #undef TRANQUILITY_SHROUD_REMOVAL_AGGRESSION
 #undef TRANQUILITY_SHROUD_REMOVAL_UNDEAD_ATTACK

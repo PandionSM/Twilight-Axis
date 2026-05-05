@@ -5,9 +5,6 @@
 	var/translated_name
 	var/list/rusgodnames = list()
 
-// Twilight Axis Necra miracle module.
-#include "../../../code/modules/spells/pantheon/divine/necra.dm"
-
 /datum/faith/divine
 	name = "Divine Pantheon"
 	translated_name = "Пантеон Десяти"

@@ -3,14 +3,36 @@
 #define NECRA_GARDEN_LIFESPAN 5 MINUTES
 #define MOVESPEED_ID_NECRA_GARDEN "necra_garden_swift"
 
+/datum/ai_controller/human_npc/necra_garden
+	planning_subtrees = list(
+		/datum/ai_planning_subtree/call_for_help,
+		/datum/ai_planning_subtree/generic_break_restraints,
+		/datum/ai_planning_subtree/use_throwable,
+		/datum/ai_planning_subtree/generic_wield,
+		/datum/ai_planning_subtree/kick_attack,
+		/datum/ai_planning_subtree/generic_resist,
+		/datum/ai_planning_subtree/generic_stand,
+		/datum/ai_planning_subtree/flee_target,
+		/datum/ai_planning_subtree/tree_climb,
+		/datum/ai_planning_subtree/aggro_find_target,
+		/datum/ai_planning_subtree/attack_obstacle_in_path,
+		/datum/ai_planning_subtree/leap_attack,
+		/datum/ai_planning_subtree/basic_melee_attack_subtree/human_npc,
+	)
+
 /mob/living/carbon/human/species/skeleton/npc/necra_garden
 	threat_point = THREAT_MODERATE
 	skel_outfit = /datum/outfit/job/roguetown/skeleton/npc/necra_garden
+	ai_controller = /datum/ai_controller/human_npc/necra_garden
 	pass_flags = PASSCLOSEDTURF
 
 /mob/living/carbon/human/species/skeleton/npc/necra_garden/after_creation()
 	..()
 	pass_flags |= PASSCLOSEDTURF
+	ADD_TRAIT(src, TRAIT_NOPAIN, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_NOPAINSTUN, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_STUNIMMUNE, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_LONGSTRIDER, TRAIT_GENERIC)
 	add_movespeed_modifier(MOVESPEED_ID_NECRA_GARDEN, multiplicative_slowdown = -1.0)
 	add_filter("necra_garden_aura", 2, list("type" = "outline", "color" = "#dcdcdc", "alpha" = 220, "size" = 1.5))
 	add_filter("necra_garden_glow", 1, list("type" = "drop_shadow", "color" = "#c8c8c8a8", "size" = 2.5, "offset" = 0))
@@ -58,13 +80,18 @@
 
 /datum/outfit/job/roguetown/skeleton/npc/necra_garden/pre_equip(mob/living/carbon/human/H)
 	..()
-	H.STASTR = 13
-	H.STASPD = 13
-	H.STACON = 8
-	H.STAWIL = 11
-	H.STAINT = 6
+	H.STASTR = 14
+	H.STASPD = 10
+	H.STACON = 12
+	H.STAWIL = 16
+	H.STAINT = 3
+	H.STALUC = 8
 	name = "Skeleton"
-	head = /obj/item/clothing/head/roguetown/necrahood
+	if(prob(75))
+		head = /obj/item/clothing/head/roguetown/necrahood
+	else
+		mask = /obj/item/clothing/head/roguetown/necramask
+		head = /obj/item/clothing/head/roguetown/helmet/heavy/necrahelm
 	cloak = /obj/item/clothing/cloak/templar/necran
 	shirt = /obj/item/clothing/suit/roguetown/armor/chainmail/iron
 	pants = /obj/item/clothing/under/roguetown/tights/vagrant

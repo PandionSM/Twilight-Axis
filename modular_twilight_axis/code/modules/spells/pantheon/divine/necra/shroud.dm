@@ -378,13 +378,15 @@
 	)
 	return !!length(faction & undead_factions)
 
-/mob/living/proc/tranquility_shroud_is_npc_undead_faction()
+/mob/living/proc/tranquility_shroud_is_npc_undead()
 	if(stat == DEAD)
 		return FALSE
 	if(tranquility_shroud_is_player_controlled())
 		return FALSE
 	if(is_player_raised_undead())
 		return FALSE
+	if(istype(src, /mob/living/carbon/human/species/skeleton))
+		return TRUE
 	return tranquility_shroud_has_undead_faction()
 
 /mob/living/proc/tranquility_shroud_has_deadite_mask()
@@ -416,7 +418,7 @@
 	. += shroud_text
 
 /mob/living/proc/tranquility_shroud_respects_deadites()
-	if(!tranquility_shroud_is_npc_undead_faction())
+	if(!tranquility_shroud_is_npc_undead())
 		return FALSE
 	var/mob/living/simple_animal/hostile/hostile_mob = src
 	if(istype(hostile_mob) && hostile_mob.attack_same)
@@ -439,10 +441,14 @@
 	return FALSE
 
 /mob/living/proc/tranquility_shroud_is_undead_witness()
-	return tranquility_shroud_is_npc_undead_faction()
+	if(stat == DEAD)
+		return FALSE
+	if(tranquility_shroud_is_player_controlled())
+		return FALSE
+	return tranquility_shroud_has_undead_faction() || (mob_biotypes & MOB_UNDEAD)
 
 /mob/living/proc/is_lesser_npc_undead()
-	if(!tranquility_shroud_is_npc_undead_faction())
+	if(!tranquility_shroud_is_npc_undead())
 		return FALSE
 	if(istype(src, /mob/living/simple_animal/hostile/boss))
 		return FALSE

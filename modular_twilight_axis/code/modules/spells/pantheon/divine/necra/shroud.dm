@@ -205,6 +205,7 @@
 	RegisterSignal(owner, COMSIG_ATOM_HITBY, PROC_REF(on_owner_hitby))
 	RegisterSignal(owner, COMSIG_ATOM_ENTERED, PROC_REF(on_owner_entered_by_atom))
 	RegisterSignal(owner, COMSIG_HUMAN_LIFE, PROC_REF(on_owner_life))
+	RegisterSignal(owner, COMSIG_PARENT_EXAMINE, PROC_REF(on_owner_examined))
 	owner.tranquility_shroud_hide_from_nearby_undead()
 
 /datum/element/tranquility_shroud/Detach(datum/source, ...)
@@ -220,6 +221,7 @@
 		COMSIG_ATOM_HITBY,
 		COMSIG_ATOM_ENTERED,
 		COMSIG_HUMAN_LIFE,
+		COMSIG_PARENT_EXAMINE,
 	))
 	return ..()
 
@@ -299,6 +301,14 @@
 		return
 	source.break_tranquility_shroud_and_anger_necra("theft")
 
+/datum/element/tranquility_shroud/proc/on_owner_examined(mob/living/source, mob/examiner, list/examine_text)
+	SIGNAL_HANDLER
+	if(!examiner || examiner == source)
+		return
+	var/extra = source.tranquility_shroud_undead_examine_text(examiner)
+	if(extra)
+		examine_text += extra
+
 /datum/element/tranquility_shroud/proc/on_owner_life(mob/living/carbon/human/source)
 	SIGNAL_HANDLER
 	if(!ishuman(source) || QDELETED(source) || source.stat == DEAD)
@@ -339,13 +349,12 @@
 
 /mob/living/proc/tranquility_shroud_undead_examine_text(mob/examiner)
 	var/datum/status_effect/tranquility_shroud/shroud = has_status_effect(/datum/status_effect/tranquility_shroud)
-	if(!shroud)
+	if(!shroud || !isliving(examiner))
 		return null
-	if(isliving(examiner))
-		var/mob/living/living_examiner = examiner
-		if(shroud.uses_vampire_mask() && living_examiner.mind?.has_antag_datum(/datum/antagonist/vampire))
-			return span_boldnotice("Низший вампир. Из мелкого ответвления, недавно обращённый.")
-	if(shroud.uses_deadite_mask())
+	var/mob/living/living_examiner = examiner
+	if(shroud.uses_vampire_mask() && living_examiner.mind?.has_antag_datum(/datum/antagonist/vampire))
+		return span_boldnotice("Низший вампир. Из мелкого ответвления, недавно обращённый.")
+	if(shroud.uses_deadite_mask() && (living_examiner.mob_biotypes & MOB_UNDEAD))
 		return span_boldnotice("Another deadite.")
 	return null
 
@@ -371,8 +380,13 @@
 	for(var/mob/living/witness in viewers(TRANQUILITY_SHROUD_ANGER_RANGE, src))
 		if(witness == src)
 			continue
-		if(witness.tranquility_shroud_is_valid_anger_undead() && !witness.can_undead_see_target(src))
-			return TRUE
+		if(witness.stat == DEAD)
+			continue
+		if(!(witness.mob_biotypes & MOB_UNDEAD))
+			continue
+		if(witness.is_player_raised_undead())
+			continue
+		return TRUE
 	return FALSE
 
 /mob/living/proc/is_lesser_npc_undead()

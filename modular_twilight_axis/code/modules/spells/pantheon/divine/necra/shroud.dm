@@ -439,8 +439,6 @@
 		return FALSE
 	if(istype(src, /mob/living/simple_animal/hostile/boss))
 		return FALSE
-	if(istype(src, /mob/living/carbon/human/species/skeleton/npc/special))
-		return FALSE
 	if(threat_point >= THREAT_ELITE)
 		return FALSE
 	if(!ai_controller && !istype(src, /mob/living/simple_animal/hostile))
@@ -453,8 +451,6 @@
 	if(!tranquility_shroud_respects_deadites())
 		return FALSE
 	if(istype(src, /mob/living/simple_animal/hostile/boss))
-		return FALSE
-	if(istype(src, /mob/living/carbon/human/species/skeleton/npc/special))
 		return FALSE
 	if(threat_point >= THREAT_ELITE)
 		return FALSE

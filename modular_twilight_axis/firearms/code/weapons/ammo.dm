@@ -122,10 +122,9 @@
 	icon_state = "debuff"
 
 /datum/status_effect/debuff/psypowder
-	id = "thunderpowder"
+	id = "psypowder"
 	alert_type = /atom/movable/screen/alert/status_effect/debuff/psypowder
-	effectedstats = list(STATKEY_STR = -3)
-	effectedstats = list(STATKEY_SPD = -2)
+	effectedstats = list(STATKEY_STR = -3, STATKEY_SPD = -2)
 	duration = 10 SECONDS
 
 /atom/movable/screen/alert/status_effect/debuff/thunderpowder

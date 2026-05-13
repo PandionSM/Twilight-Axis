@@ -289,7 +289,7 @@
 	neck = /obj/item/clothing/neck/roguetown/leather/blackpowder
 	gloves = /obj/item/clothing/gloves/roguetown/chain/psydon
 	mask = /obj/item/clothing/mask/rogue/facemask/steel/confessor
-	id = /obj/item/clothing/ring/signet/silver
+	id = /obj/item/clothing/ring/signet/psy
 	var/classes = list("Legionnaire", "Otavan Volf")
 	var/classchoice = input(H, "Choose your archetypes", "Available archetypes") as anything in classes
 	

@@ -80,7 +80,7 @@
 	pants = /obj/item/clothing/under/roguetown/heavy_leather_pants/otavan
 	backr = /obj/item/storage/backpack/rogue/satchel/otavan
 	gloves = /obj/item/clothing/gloves/roguetown/otavan/psygloves
-	id = /obj/item/clothing/ring/signet/silver
+	id = /obj/item/clothing/ring/signet/psy
 	backpack_contents = list(
 		/obj/item/storage/keyring/inquisitor = 1,
 		/obj/item/rogueweapon/huntingknife/idagger/silver/psydagger,

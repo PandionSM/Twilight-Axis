@@ -1,5 +1,5 @@
 /obj/machinery/auto_stonecutter
-	name = "Камнерезка"
+	name = "Stone cutter"
 	desc = "Автоматическая машина для резки камня, работает на пружинах и шестернях."
 	icon = 'icons/roguetown/misc/auto.dmi'
 	icon_state = "autochisel"

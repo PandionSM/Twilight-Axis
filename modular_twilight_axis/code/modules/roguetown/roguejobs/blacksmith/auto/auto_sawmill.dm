@@ -1,5 +1,5 @@
 /obj/machinery/auto_sawmill
-	name = "Лесопилка"
+	name = "Sawmill"
 	desc = "Простая конструкция с неизвестной внутренней частью и острым лезвием."
 	icon = 'icons/roguetown/misc/auto.dmi'
 	icon_state = "autosawoff"

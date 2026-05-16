@@ -290,6 +290,8 @@
 	gloves = /obj/item/clothing/gloves/roguetown/chain/psydon
 	mask = /obj/item/clothing/mask/rogue/facemask/steel/confessor
 	id = /obj/item/clothing/ring/signet/psy
+	var/datum/devotion/C = new /datum/devotion(H, H.patron)
+	C.grant_miracles(H, cleric_tier = CLERIC_T1, passive_gain = CLERIC_REGEN_WEAK, devotion_limit = CLERIC_REQ_1)
 	var/classes = list("Legionnaire", "Otavan Volf")
 	var/classchoice = input(H, "Choose your archetypes", "Available archetypes") as anything in classes
 	

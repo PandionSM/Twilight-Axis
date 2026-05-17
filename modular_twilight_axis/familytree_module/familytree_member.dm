@@ -402,6 +402,14 @@
 			return "daughter-in-law"
 	return GetChildInLawTerm()
 
+/datum/family_member/proc/GetSpouseOfNieceNephewTerm()
+	switch(GetRelationshipStyle())
+		if("masculine")
+			return "nephew-in-law"
+		if("feminine")
+			return "niece-in-law"
+	return "niece/nephew-in-law"
+
 /datum/family_member/proc/GetStepChildTerm()
 	switch(GetRelationshipStyle())
 		if("masculine")
@@ -691,6 +699,13 @@
 	for(var/datum/family_member/member as anything in family.members)
 		if(AreSiblings(member) && (other in member.get_spouse_members()))
 			return other.GetSpouseOfSiblingTerm()
+
+	for(var/datum/family_member/sibling as anything in family.members)
+		if(!AreSiblings(sibling) || sibling == src)
+			continue
+		for(var/datum/family_member/nibling as anything in sibling.get_blood_child_members())
+			if(other in nibling.get_spouse_members())
+				return other.GetSpouseOfNieceNephewTerm()
 
 	for(var/datum/family_member/child as anything in get_child_members())
 		if(other in child.get_spouse_members())

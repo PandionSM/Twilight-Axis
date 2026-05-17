@@ -396,17 +396,21 @@
 	return parent_names
 
 /datum/heritage/proc/BuildInLawParentNode(datum/family_member/member, datum/family_member/checker_member)
-	if(!member?.person || !member.cosmetic)
+	if(!member || (!member.person && !member.phantom) || (!member.cosmetic && !member.phantom))
 		return null
 
 	var/relation_text = checker_member ? checker_member.GetRelationshipTo(member) : null
-	var/list/details = list("NPC")
+	var/list/details = list()
+	if(member.phantom)
+		details += "Unrecorded ancestor"
+	else if(member.cosmetic)
+		details += "NPC"
 	if(member.person?.dna?.species?.name)
 		details += member.person.dna.species.name
 	var/list/parent_names = BuildFamilyTreeParentNames(member)
 
 	return list(
-		"name" = member.person.real_name,
+		"name" = FamilyTreeMemberDisplayName(member) || "Unknown",
 		"label" = relation_text ? uppertext(relation_text) : null,
 		"details" = details,
 		"accentColor" = GetRelationColor(relation_text),
@@ -587,13 +591,12 @@
 		for(var/datum/family_member/spouse as anything in root_member.get_spouse_members())
 			if(!spouse || visited[spouse])
 				continue
-			var/list/spouse_visited = visited.Copy()
-			var/list/spouse_node = BuildFamilyTree(spouse, checker_member, spouse_visited, depth + 1, FALSE, FALSE, spouse_seen)
+			var/list/spouse_node = BuildFamilyTree(spouse, checker_member, visited, depth + 1, FALSE, FALSE, spouse_seen)
 			if(spouse_node)
 				spouse_seen[spouse] = TRUE
 				var/list/spouse_parent_nodes = list()
 				for(var/datum/family_member/sp_parent as anything in spouse.get_parent_members())
-					if(!sp_parent?.cosmetic)
+					if(!sp_parent?.cosmetic && !sp_parent?.phantom)
 						continue
 					if(visited[sp_parent])
 						continue

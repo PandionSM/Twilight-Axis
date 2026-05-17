@@ -123,12 +123,10 @@ INITIALIZE_IMMEDIATE(/mob/dead)
 		var/job_choice = player.client?.prefs?.job_preferences
 		if(job_choice) // TA EDIT START
 			var/selected_job_name
-			var/selected_is_boost = FALSE
 
 			for(var/job_name in job_choice)
 				if(job_choice[job_name] == JP_BOOST)
 					selected_job_name = job_name
-					selected_is_boost = TRUE
 					break
 
 			if(!selected_job_name)

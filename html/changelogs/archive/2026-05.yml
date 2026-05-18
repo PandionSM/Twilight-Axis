@@ -1358,7 +1358,6 @@
       swap.
   - refactor: Optimized AI target finding by around 15% and cut down frequency of
       scan by 50%. Report odd behaviors. Otherwise should save us a little CPU.
-=======
   msw7007:
   - server: "\u043F\u0435\u0440\u0435\u0431\u0440\u043E\u0441 \u043C\u043E\u0434\u0443\
       \u043B\u0435\u0439"
@@ -1505,10 +1504,3 @@
   zRainbowcat:
   - bugfix: Hoardmaster
   - bugfix: bandits
-2026-05-18:
-  WeNeedMorePhoron:
-  - refactor: Optimized preview icon in the character creator by up to 80% (Around
-      50% on live). Report odd behaviors, especially with tauric character, species
-      swap.
-  - refactor: Optimized AI target finding by around 15% and cut down frequency of
-      scan by 50%. Report odd behaviors. Otherwise should save us a little CPU.

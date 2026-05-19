@@ -50,6 +50,17 @@ PROCESSING_SUBSYSTEM_DEF(roguemachine)
 						M.playsound_local(M.loc, the_track, 100, FALSE)
 				death_queue.Cut()
 
+/datum/controller/subsystem/processing/roguemachine/proc/add_secret_mail(obj/item/P) // TA EDIT
+	if(!P) // TA EDIT
+		return // TA EDIT
+	secret_mail += P // TA EDIT
+	RegisterSignal(P, COMSIG_PARENT_QDELETING, PROC_REF(remove_secret_mail)) // TA EDIT
+
+/datum/controller/subsystem/processing/roguemachine/proc/remove_secret_mail(datum/source) // TA EDIT
+	SIGNAL_HANDLER // TA EDIT
+	secret_mail -= source // TA EDIT
+	UnregisterSignal(source, COMSIG_PARENT_QDELETING) // TA EDIT
+
 /proc/is_in_roguetown(atom/A)
 	if(!A)
 		return FALSE

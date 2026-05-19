@@ -48,9 +48,19 @@
 		
 		if(SSroguemachine.secret_mail?.len) // TA EDIT
 			for(var/obj/item/I in SSroguemachine.secret_mail) // TA EDIT
+				var/is_mine = FALSE // TA EDIT
 				if(I.mailedto == H.real_name) // TA EDIT
+					is_mine = TRUE // TA EDIT
+				else if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand") // TA EDIT
+					if(findtext(I.mailedto, "#")) // TA EDIT
+						var/box2find = text2num(copytext(I.mailedto, findtext(I.mailedto, "#")+1)) // TA EDIT
+						for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
+							if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
+								is_mine = TRUE // TA EDIT
+								break // TA EDIT
+				if(is_mine) // TA EDIT
 					if(!addl_mail) // TA EDIT
-						SSroguemachine.secret_mail -= I // TA EDIT
+						SSroguemachine.remove_secret_mail(I) // TA EDIT
 						I.forceMove(src.loc) // TA EDIT
 						user.put_in_hands(I) // TA EDIT
 						addl_mail = TRUE // TA EDIT
@@ -69,7 +79,7 @@
 					else
 						say("You have additional mail available.")
 						break
-			if(!any_additional_mail(M, H.real_name))
+			if(!any_additional_mail(M, H)) // TA EDIT
 				if(!addl_mail && H.has_status_effect(/datum/status_effect/ugotmail)) // we apparently got mail, but never got mail (hint: it was stolen by someone with access to the master mailer)
 					to_chat(user, span_notice("I look inside the machine and find no letter, how strange."))
 				H.remove_status_effect(/datum/status_effect/ugotmail)
@@ -164,6 +174,28 @@
 	user.log_message("sent mail via [name]/[(loc)] from [sender_name] to [recipient_name]", LOG_GAME)
 	message_admins("[key_name(user)] sent mail via [name]/[(loc)] from [sender_name] to [recipient_name]")
 
+/obj/structure/roguemachine/mail/proc/check_free_send(mob/user, send2place) // TA EDIT
+	var/is_court_agent = FALSE // TA EDIT
+	if(ishuman(user)) // TA EDIT
+		var/mob/living/carbon/human/H_user = user // TA EDIT
+		if(H_user.mind?.assigned_role == "Court Agent" || H_user.mind?.special_role == "Court Agent") // TA EDIT
+			is_court_agent = TRUE // TA EDIT
+
+	var/is_hand = FALSE // TA EDIT
+	if(findtext(send2place, "#")) // TA EDIT
+		var/box2find = text2num(copytext(send2place, findtext(send2place, "#")+1)) // TA EDIT
+		for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
+			if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
+				is_hand = TRUE // TA EDIT
+				break // TA EDIT
+	else // TA EDIT
+		for(var/mob/living/carbon/human/H_target in GLOB.human_list) // TA EDIT
+			if(H_target.real_name == send2place) // TA EDIT
+				if(H_target.mind?.assigned_role == "Hand" || H_target.mind?.special_role == "Hand") // TA EDIT
+					is_hand = TRUE // TA EDIT
+				break // TA EDIT
+	return (is_court_agent && is_hand) // TA EDIT
+
 /obj/structure/roguemachine/mail/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	if(..())
 		return TRUE
@@ -195,27 +227,7 @@
 			if(!send2place)
 				return TRUE
 
-			var/is_court_agent = FALSE // TA EDIT
-			if(ishuman(user)) // TA EDIT
-				var/mob/living/carbon/human/H_user = user // TA EDIT
-				if(H_user.mind?.assigned_role == "Court Agent" || H_user.mind?.special_role == "Court Agent") // TA EDIT
-					is_court_agent = TRUE // TA EDIT
-
-			var/is_hand = FALSE // TA EDIT
-			if(findtext(send2place, "#")) // TA EDIT
-				var/box2find = text2num(copytext(send2place, findtext(send2place, "#")+1)) // TA EDIT
-				for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
-					if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
-						is_hand = TRUE // TA EDIT
-						break // TA EDIT
-			else // TA EDIT
-				for(var/mob/living/carbon/human/H_target in GLOB.human_list) // TA EDIT
-					if(H_target.real_name == send2place) // TA EDIT
-						if(H_target.mind?.assigned_role == "Hand" || H_target.mind?.special_role == "Hand") // TA EDIT
-							is_hand = TRUE // TA EDIT
-						break // TA EDIT
-
-			var/free_send = (is_court_agent && is_hand) // TA EDIT
+			var/free_send = check_free_send(user, send2place) // TA EDIT
 
 			if(!free_send && coin_loaded < 1) // TA EDIT
 				to_chat(user, span_warning("Not enough coins.")) // TA EDIT
@@ -232,14 +244,13 @@
 			P.update_icon()
 
 			if(free_send) // TA EDIT
-				SSroguemachine.secret_mail += P // TA EDIT
+				SSroguemachine.add_secret_mail(P) // TA EDIT
 				P.moveToNullspace() // Keep it off the map // TA EDIT
 				for(var/mob/living/carbon/human/H in GLOB.human_list) // TA EDIT
 					var/is_target = FALSE // TA EDIT
 					if(findtext(send2place, "#")) // TA EDIT
 						if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand") // TA EDIT
 							is_target = TRUE // TA EDIT
-							P.mailedto = H.real_name // Retarget to Hand so they can fetch it // TA EDIT
 					else // TA EDIT
 						if(H.real_name == send2place) // TA EDIT
 							is_target = TRUE // TA EDIT
@@ -641,27 +652,7 @@
 			if(!sentfrom)
 				sentfrom = "Anonymous"
 			
-			var/is_court_agent = FALSE // TA EDIT
-			if(ishuman(user)) // TA EDIT
-				var/mob/living/carbon/human/H_user = user // TA EDIT
-				if(H_user.mind?.assigned_role == "Court Agent" || H_user.mind?.special_role == "Court Agent") // TA EDIT
-					is_court_agent = TRUE // TA EDIT
-
-			var/is_hand = FALSE // TA EDIT
-			if(findtext(send2place, "#")) // TA EDIT
-				var/box2find = text2num(copytext(send2place, findtext(send2place, "#")+1)) // TA EDIT
-				for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
-					if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
-						is_hand = TRUE // TA EDIT
-						break // TA EDIT
-			else // TA EDIT
-				for(var/mob/living/carbon/human/H_target in GLOB.human_list) // TA EDIT
-					if(H_target.real_name == send2place) // TA EDIT
-						if(H_target.mind?.assigned_role == "Hand" || H_target.mind?.special_role == "Hand") // TA EDIT
-							is_hand = TRUE // TA EDIT
-						break // TA EDIT
-
-			var/free_send = (is_court_agent && is_hand) // TA EDIT
+			var/free_send = check_free_send(user, send2place) // TA EDIT
 
 			if(free_send) // TA EDIT
 				P.mailer = sentfrom // TA EDIT
@@ -669,14 +660,13 @@
 				if(istype(P, /obj/item/paper)) // TA EDIT
 					var/obj/item/paper/PA = P // TA EDIT
 					PA.update_icon() // TA EDIT
-				SSroguemachine.secret_mail += P // TA EDIT
+				SSroguemachine.add_secret_mail(P) // TA EDIT
 				P.moveToNullspace() // Keep it off the map // TA EDIT
 				for(var/mob/living/carbon/human/H in GLOB.human_list) // TA EDIT
 					var/is_target = FALSE // TA EDIT
 					if(findtext(send2place, "#")) // TA EDIT
 						if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand") // TA EDIT
 							is_target = TRUE // TA EDIT
-							P.mailedto = H.real_name // Retarget to Hand so they can fetch it // TA EDIT
 					else // TA EDIT
 						if(H.real_name == send2place) // TA EDIT
 							is_target = TRUE // TA EDIT
@@ -890,14 +880,20 @@
 			STR.remove_from_storage(I, get_turf(src))
 	return ..()
 
-/obj/structure/roguemachine/mail/proc/any_additional_mail(obj/item/roguemachine/mastermail/M, name)
+/obj/structure/roguemachine/mail/proc/any_additional_mail(obj/item/roguemachine/mastermail/M, mob/living/carbon/human/H) // TA EDIT
 	if(SSroguemachine.secret_mail?.len) // TA EDIT
 		for(var/obj/item/I in SSroguemachine.secret_mail) // TA EDIT
-			if(I.mailedto == name) // TA EDIT
+			if(I.mailedto == H.real_name) // TA EDIT
 				return TRUE // TA EDIT
+			else if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand") // TA EDIT
+				if(findtext(I.mailedto, "#")) // TA EDIT
+					var/box2find = text2num(copytext(I.mailedto, findtext(I.mailedto, "#")+1)) // TA EDIT
+					for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
+						if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
+							return TRUE // TA EDIT
 	if(M)
 		for(var/obj/item/I in M.contents)
-			if(I.mailedto == name)
+			if(I.mailedto == H.real_name) // TA EDIT
 				return TRUE
 	return FALSE
 

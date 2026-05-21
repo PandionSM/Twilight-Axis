@@ -1573,10 +1573,14 @@
   - balance: Black rot cures are now gradual.
   - balance: Black rot cures can be interrupted by rotfang attacks.
   - balance: T4 black rot slightly easier to achieve/maintain.
+  Ryan180602:
+  - rscadd: winter dress for -3 triumphs in loadout.
+  - rscdel: heavy leather armour from triumphstore.
   WeNeedMorePhoron:
   - rscadd: Ported Qdel / Delete logs improvements. At roundend, qdel.log extra details
       and other things to help us better track down hard deletes.
   borneblood:
+  - bugfix: fixed a few wrong variable values
   - rscadd: T3 - Bone Cataclysm
   - rscdel: T2 - Summon (Carbon) Deadite
   - balance: Adjusted Rituos paths to be more distinctive from each other.

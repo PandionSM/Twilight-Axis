@@ -45,28 +45,29 @@
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		var/addl_mail = FALSE
-		
-		if(SSroguemachine.secret_mail?.len) // TA EDIT
-			for(var/obj/item/I in SSroguemachine.secret_mail) // TA EDIT
-				var/is_mine = FALSE // TA EDIT
-				if(I.mailedto == H.real_name) // TA EDIT
-					is_mine = TRUE // TA EDIT
-				else if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand") // TA EDIT
-					if(findtext(I.mailedto, "#")) // TA EDIT
-						var/box2find = text2num(copytext(I.mailedto, findtext(I.mailedto, "#")+1)) // TA EDIT
-						for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) // TA EDIT
-							if(X.ournum == box2find && X.mailtag == "Hand") // TA EDIT
-								is_mine = TRUE // TA EDIT
-								break // TA EDIT
-				if(is_mine) // TA EDIT
-					if(!addl_mail) // TA EDIT
-						SSroguemachine.remove_secret_mail(I) // TA EDIT
-						I.forceMove(src.loc) // TA EDIT
-						user.put_in_hands(I) // TA EDIT
-						addl_mail = TRUE // TA EDIT
-					else // TA EDIT
-						say("You have additional mail available.") // TA EDIT
-						break // TA EDIT
+		// TA EDIT BEGIN
+		if(SSroguemachine.secret_mail?.len)
+			for(var/obj/item/I in SSroguemachine.secret_mail)
+				var/is_mine = FALSE
+				if(I.mailedto == H.real_name)
+					is_mine = TRUE 
+				else if(H.mind?.assigned_role == "Hand" || H.mind?.special_role == "Hand")
+					if(findtext(I.mailedto, "#"))
+						var/box2find = text2num(copytext(I.mailedto, findtext(I.mailedto, "#")+1))
+						for(var/obj/structure/roguemachine/mail/X in SSroguemachine.hermailers) 
+							if(X.ournum == box2find && X.mailtag == "Hand") 
+								is_mine = TRUE 
+								break 
+				if(is_mine) 
+					if(!addl_mail)
+						SSroguemachine.remove_secret_mail(I)
+						I.forceMove(src.loc)
+						user.put_in_hands(I)
+						addl_mail = TRUE
+					else 
+						say("You have additional mail available.")
+						break 
+		// TA EDIT END
 
 		if(SSroguemachine.hermailermaster)
 			var/obj/item/roguemachine/mastermail/M = SSroguemachine.hermailermaster

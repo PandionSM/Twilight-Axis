@@ -163,10 +163,6 @@ Reel teleports the attached atom to the grabbed turf.
 	if(!Tu || !Tt)
 		return FALSE
 
-	// Do not allow cross-z grappling through a solid floor/ceiling.
-	if((state == GRAPPLER_ZDOWN || state == GRAPPLER_ZUP) && !istransparentturf(Tu) && !istransparentturf(Tt))
-		return FALSE
-
 	var/dist = get_dist(Tt, Tu)
 	var/last_dir
 	var/turf/last_step
@@ -184,8 +180,14 @@ Reel teleports the attached atom to the grabbed turf.
 	var/success = FALSE
 
 	if(state == GRAPPLER_ZDOWN || state == GRAPPLER_ZUP)
-		for(var/i = 0, i <= dist, i++)
+		if(last_step == Tt)
+			return TRUE
+
+		for(var/i = 1, i <= dist, i++)
 			last_dir = get_dir(last_step, Tt)
+			if(!last_dir)
+				return TRUE
+
 			var/turf/Tstep = get_step(last_step, last_dir)
 			if(!Tstep)
 				return FALSE
@@ -222,7 +224,7 @@ Reel teleports the attached atom to the grabbed turf.
 			if(T.opacity || (T.density && T != Tu))	//Any dense or opaque turfs
 				success = FALSE
 				return success
-			for(var/obj/O in (T.contents + Tt.contents))
+			for(var/obj/O in T.contents)
 				if(O == ignore_atom)
 					continue
 				if(O.density || O.opacity)	//ANY dense or opaque objects. It's strict, but it's also a teleport, so. 

@@ -123,15 +123,11 @@ Reel teleports the attached atom to the grabbed turf.
 				user.visible_message(span_info("[user] gets interrupted!"))
 	else if(istype(user.used_intent, /datum/intent/reel))	//Alternative to clicking on an empty tile. You can self-use it to reel instead.
 		if(attached && in_use)
-			var/reason = grapple_path_block_reason(grappled_turf, attached, attached)
+			var/reason = reel_path_block_reason(attached)
 			if(!reason)
 				user.visible_message("[user] reels in the [src]!")
 				if(do_after(user, 10))
-					reason = grapple_path_block_reason(grappled_turf, attached, attached)
-					if(!reason)
-						reel()
-					else
-						to_chat(user, span_info(reason))
+					reel(user)
 			else
 				to_chat(user, span_info(reason))
 	else if(!is_loaded && in_use && grappled_turf && tile_effect)	//Reset option.
@@ -264,9 +260,49 @@ Reel teleports the attached atom to the grabbed turf.
 
 	return null
 
+/obj/item/grapplinghook/proc/reel_path_block_reason(atom/thing_to_reel)
+	if(!thing_to_reel || !grappled_turf)
+		return "The path is blocked!"
+
+	var/turf/source_turf = get_turf(thing_to_reel)
+	if(!source_turf)
+		return "The path is blocked!"
+
+	if(source_turf == grappled_turf)
+		return null
+
+	var/state
+	var/allowed_range
+	if(source_turf.z == grappled_turf.z)
+		state = GRAPPLER_NOZ
+		allowed_range = max_range_noz
+	else if(grappled_turf.z > source_turf.z)
+		state = GRAPPLER_ZUP
+		allowed_range = max_range_z
+	else
+		state = GRAPPLER_ZDOWN
+		allowed_range = max_range_z
+
+	if(get_dist(source_turf, grappled_turf) > allowed_range)
+		return "[thing_to_reel] is too far!"
+
+	if((state == GRAPPLER_ZUP || state == GRAPPLER_ZDOWN) && !istransparentturf(source_turf) && !istransparentturf(grappled_turf))
+		return "The path is blocked!"
+
+	if(!check_path(source_turf, grappled_turf, state, FALSE, thing_to_reel))
+		return "The path is blocked!"
+
+	return null
+
 //Successful reel, complete reset.
-/obj/item/grapplinghook/proc/reel()
+/obj/item/grapplinghook/proc/reel(mob/user = null)
 	if(attached && in_use && grappled_turf)
+		var/reason = reel_path_block_reason(attached)
+		if(reason)
+			if(user)
+				to_chat(user, span_info(reason))
+			return FALSE
+
 		var/mob/living/grabber
 		var/mob/living/grabby
 		var/grapple_buckled
@@ -291,6 +327,8 @@ Reel teleports the attached atom to the grabbed turf.
 			reset_tile(silent = TRUE)
 			reset_target()
 			unload(failure = TRUE)
+			return TRUE
+	return FALSE
 
 /obj/item/grapplinghook/proc/destroy_eligible_objects()
 	if(length(obj_to_destroy))
@@ -387,15 +425,11 @@ Reel teleports the attached atom to the grabbed turf.
 
 	if(istype(user.used_intent, /datum/intent/reel))	//Last step, we reel in the attached entity to the grappled turf.
 		if(attached && in_use)
-			var/reason = grapple_path_block_reason(grappled_turf, attached, attached)
+			var/reason = reel_path_block_reason(attached)
 			if(!reason)
 				user.visible_message("[user] reels in \the [src]!")
 				if(do_after(user, 10))
-					reason = grapple_path_block_reason(grappled_turf, attached, attached)
-					if(!reason)
-						reel()
-					else
-						to_chat(user, span_info(reason))
+					reel(user)
 			else
 				to_chat(user, span_info(reason))
 		else

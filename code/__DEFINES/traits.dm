@@ -239,6 +239,7 @@
 #define TRAIT_AGENT_BATHHOUSE "Agent of the Bathhouse"
 #define TRAIT_AGENT_CHURCH "Ecclesiastical Benefactor"
 #define TRAIT_ARREARS "Poll Tax Arrears"
+#define TRAIT_DECLARED_BENEFACTOR "Ecclesiastical Benefactor"
 #define TRAIT_PATRONAGE_GRANT "patronage_grant"
 #define TRAIT_COUNTERCOUNTERSPELL "Counter Counterspell"
 #define TRAIT_UNSEEMLY "Ugly"

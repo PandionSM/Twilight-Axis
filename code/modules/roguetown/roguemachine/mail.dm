@@ -323,7 +323,7 @@
 					if(6)
 						new /obj/item/clothing/neck/roguetown/luckcharm/mercmedal/freifechter(src.loc)
 					if(7)
-						new /obj/item/clothing/neck/roguetown/luckcharm/mercmedal/grenzelhoft/src.loc)
+						new /obj/item/clothing/neck/roguetown/luckcharm/mercmedal/grenzelhoft(src.loc)
 					if(8)
 						new /obj/item/clothing/neck/roguetown/luckcharm/mercmedal/grudgebearer(src.loc)
 					if(9)

@@ -103,7 +103,7 @@
 	if(show_craft)
 		var/list/craft_lines = list()
 		if(anvilrepair)
-			var/S = anvilrepair
+			var/datum/skill/S = anvilrepair
 			craft_lines += "Repair: Hammer (<b>[initial(S.name)]</b>)"
 		if(sewrepair)
 			craft_lines += "Repair: Needle (<b>Sewing</b>)"

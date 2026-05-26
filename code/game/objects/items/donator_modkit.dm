@@ -307,7 +307,7 @@
 //Strudel - Custom leather vest type and xylix tabard
 /obj/item/enchantingkit/strudel1
 	name = "'Grenzelhoft Mage Vest' morphing elixir"
-  desc = "A small container of special morphing dust, perfect to make a specifc item. Required: Robe"
+	desc = "A small container of special morphing dust, perfect to make a specifc item. Required: Robe"
 	target_items = list(/obj/item/clothing/suit/roguetown/shirt/robe,
 						/obj/item/clothing/suit/roguetown/shirt/robe)
 	result_item = /obj/item/clothing/suit/roguetown/shirt/sofiavest

@@ -42,15 +42,19 @@
 #define TRAIT_JOURNEYS_END "Journey's End"
 #define TRAIT_RAGE "Rage"
 #define TRAIT_CRITICAL_WEAKNESS "Critical Weakness"
+#define TRAIT_SHATTER_KILL "Shatterable Form" //Lesser ver of critical weakness that only instantly kills on chest fractures/paralysis.
 #define TRAIT_DNR "Bane of Existence"
 #define TRAIT_PHILOSOPHER_BOUND "Philosopher bound"
 #define TRAIT_MANIAC_AWOKEN "Awoken"
+#define TRAIT_BOW_DOUBLESHOT "Double Shot Archer"//TA EDIT
+#define TRAIT_BOW_LONGSHOT "Long Shot Archer"//TA EDIT
+#define TRAIT_BOW_BACKSTEP "Skirmisher Archer"//TA EDIT
 #define TRAIT_INFINITE_STAMINA "Indefatigable" //for ai
 #define TRAIT_NUDIST "Nudist" //you can't wear most clothes
 #define TRAIT_CYCLOPS_LEFT "Cyclops (Left)" //poked left eye
 #define TRAIT_CYCLOPS_RIGHT "Cyclops (Right)" //poked right eye
 #define TRAIT_INHUMEN_ANATOMY "Inhumen Anatomy" //can't wear hats and shoes
-#define TRAIT_NASTY_EATER "Inhumen Digestion" //can eat rotten food, organs, poison berries, and drink murky water
+#define TRAIT_NASTY_EATER "Inhumen Digestion" //can eat rotten/raw/burned food, organs, and drink murky water. Does NOT protect against actual poisons.
 #define TRAIT_WILD_EATER "Beastly Digestion" //can eat raw and rotten food and drink murky water
 #define TRAIT_INSPIRING_MUSICIAN "Inspiring Musician" // unlocks bardic inspiration stuff
 #define TRAIT_NOFALLDAMAGE1 "Fall Damage Reduction"
@@ -227,6 +231,13 @@
 #define TRAIT_BIGGUY "Big Guy"
 #define TRAIT_RESIDENT "Resident"
 #define TRAIT_DEBTOR "Default Debtor"
+#define TRAIT_DEBTOR_CROWN "Default Debtor (Crown)"
+#define TRAIT_DEBTOR_CHURCH "Default Debtor (Church)"
+#define TRAIT_DEBTOR_MERCHANT "Default Debtor (Merchant)"
+#define TRAIT_DEBTOR_BATHHOUSE "Default Debtor (Bathhouse)"
+#define TRAIT_AGENT_MERCHANT "Agent of the Trading Company"
+#define TRAIT_AGENT_BATHHOUSE "Agent of the Bathhouse"
+#define TRAIT_AGENT_CHURCH "Ecclesiastical Benefactor"
 #define TRAIT_ARREARS "Poll Tax Arrears"
 #define TRAIT_DECLARED_BENEFACTOR "Ecclesiastical Benefactor"
 #define TRAIT_PATRONAGE_GRANT "patronage_grant"
@@ -330,6 +341,7 @@
 #define TRAIT_ZIZOEYES "Zizo eyes"
 #define TRAIT_NOC_LIGHT_BLESSING "Noc Blessing"
 #define TRAIT_OUTLANDER "Outlander"
+#define TRAIT_VOLF "Volf"
 // If you want description to show up you gotta have the trait name defined BEFORE this lol
 
 GLOBAL_LIST_INIT(roguetraits, list(
@@ -398,6 +410,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_JOURNEYS_END = span_info ("As the lyfe ebbs from my veins, my resolve hardens to push through. Do not go quietly into that good nite."),
 	TRAIT_RAGE = span_info ("PAIN AND INJURY FUELS MY BATTLERAGE!"),
 	TRAIT_CRITICAL_WEAKNESS = span_danger("I am weak to wounds that others could survive."),
+	TRAIT_SHATTER_KILL = span_danger("My form is vulnerable to chest fractures and paralysis, I will die instantly if my ribs shatter or I am paralyised."),
 	TRAIT_DNR = span_danger("My lux' vigor is weak. There is no hope for me. This lyfe is all I have."),
 	TRAIT_PHILOSOPHER_BOUND = span_danger("I bound my soul."),
 	TRAIT_MANIAC_AWOKEN = span_danger("I am <b>WAKING UP</b> and the sheeple know this. They will resist."),
@@ -408,7 +421,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_LEECHIMMUNE = "Leeches are reluctant to bite me.",
 	TRAIT_BITERHELM = "Whether through design or symbiosis, I can now bite into others while wearing a visored helmet.",
 	TRAIT_INHUMEN_ANATOMY = "My anatomy is inhumen, preventing me from wearing hats and shoes.",
-	TRAIT_NASTY_EATER = span_dead("I can eat bad food, and water that would be toxic to humen will not affect me."),
+	TRAIT_NASTY_EATER = span_dead("I can stomach rotten, raw, or burned food, organs, and murky water - but true poisons still afflict me."),
 	TRAIT_WILD_EATER = span_info("I can eat raw food and drink from dirty water."),
 	TRAIT_NOFALLDAMAGE1 = span_warning("I can easily handle minor falls."),
 	TRAIT_NOFALLDAMAGE2 = span_warning("I can handle a fall from any height."),
@@ -425,6 +438,9 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_KNEESTINGER_IMMUNITY = "I am immune to the shock of kneestingers and vines.",
 	TRAIT_SOUL_EXAMINE = span_deadsay("I know when someone's soul has departed."),
 	TRAIT_CRACKHEAD = span_love("I can use drugs as much as I want!"),
+	TRAIT_BOW_DOUBLESHOT = span_info("Я овладел искусством Двойного выстрела. Могу быстро достать вторую стрелу из колчана."),//TA EDIT
+	TRAIT_BOW_LONGSHOT = span_info("Я овладел Дальнобойным выстрелом. Чем дальше моя цель, тем смертоноснее моя стрела."),//TA EDIT
+	TRAIT_BOW_BACKSTEP = span_info("Я овладел искусством Выстрел с отскоком. Дал дал ушел."),//TA EDIT
 	TRAIT_FREEMAN = span_bloody("I can recognize other free men, and they can recognize me too."),
 	TRAIT_KNOWNCRIMINAL = span_bloody("I am a branded criminal. Nothing can change this."),
 	TRAIT_NORUN = span_warning("My body has atrophied in my state of decay; my leg joints just don't have the strength or durability for running anymore"),
@@ -501,6 +517,14 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_DARKVISION = span_info("I can see better in the dark."),
 	TRAIT_NITEVISION = span_info("I can see perfectly in the dark."),
 	TRAIT_NOCSHADES = span_info("The lens I look through allows me to see in the dark clear as dae, at the cost of greater vision."),
+	TRAIT_DEBTOR = span_danger("I have defaulted on a loan. My name is writ red in the ledger until the debt is cleared."),
+	TRAIT_DEBTOR_CROWN = span_danger("My defaulted debt is owed to the Crown. The Steward keeps the tally."),
+	TRAIT_DEBTOR_CHURCH = span_danger("My defaulted debt is owed to the Church. The faithful keep the tally."),
+	TRAIT_DEBTOR_MERCHANT = span_danger("My defaulted debt is owed to the Merchant. The trading company keeps the tally."),
+	TRAIT_DEBTOR_BATHHOUSE = span_danger("My defaulted debt is owed to the Bathhouse. The bathmasters keep the tally."),
+	TRAIT_AGENT_MERCHANT = span_info("I am a chartered agent of the Azurian Trading Company. I keep its tally and ledger."),
+	TRAIT_AGENT_BATHHOUSE = span_info("I am an agent of the Bathhouse. I keep its tally and ledger."),
+	TRAIT_AGENT_CHURCH = span_info("I am a Benefactor of the Church of Azuria. The faithful know my name."),
 	TRAIT_RESIDENT = span_info("I've been granted a Meister account, and the ownership of a house in city."), //TA_EDIT
 	TRAIT_DEBTOR = span_danger("I have defaulted on a Crown loan. My name is writ red in the ledger until the Steward clears it."),
 	TRAIT_ARREARS = span_smallred("I am behind on my poll tax. The Stewardry keeps the tally; the garrison may mark my destitution."),
@@ -511,7 +535,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_SLEUTH = span_info("I can spot my tracked Mark's trail without needing to approach it, and can spot them at a distance. I can track more frequently, and the act is not impaired by movement. I can examine tracks right away."),
 	TRAIT_HARDSHELL = span_info("The bulk of this armor prevents me from parrying effectively, but I can still move out of the way."),
 	TRAIT_MATTHIOS_EYES = span_notice("I have a sense for what the most valuable item someone has is. I can also tell if someone is hoarding mammons, and with blessed gilded spectacles, I can even see how much they have in their bank."),
-	TRAIT_WOODWALKER = span_notice("I can climb trees quicker, and gain climbing experience twice as quickly. I can step on thorns and branches safely in the woods. I can get twice as many things from searching bushes, and I can stand on leaves in trees safely."),
+	TRAIT_WOODWALKER = span_notice("I can climb trees quicker, and gain climbing experience twice as quickly. I can step on thorns and branches safely in the woods. I can stand on leaves in trees safely."),
 	TRAIT_ARCYNE = span_notice("I am trained in the Arcyne arts, allowing me to wield magyck."),
 	TRAIT_INFINITE_ENERGY = span_notice ("I don't need rest; I won't ever feel fatigue."),
 	TRAIT_PERMAMUTE = span_notice("I am a mute. I cannot speak."),
@@ -597,6 +621,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_FIREARMS_MARKSMAN = span_greentext("I'm an experienced gunslinger, and have spent many years learning to shoot firearms accurately over great distances. Firearms can progress to Legendary levels."),
 	TRAIT_VILLAIN = span_warning("I am a devious, conniving villain!"),
 	TRAIT_WOUNDREGEN = span_info("My wounds and bones mend on their own, my bleeding clots quickly.."),
+	TRAIT_VOLF = span_info("I can barely see in the darkness of the world.."),
 
 	TRAIT_ARTILLERY_EXPERT = span_greentext("Я ранее обращался с артиллерией и разбираюсь в тонкостях её наводки."),
 	TRAIT_ZIZOEYES = span_notice("You no longer fear a veil of the darkness, yet your eyes are glimmering lights in it.."),

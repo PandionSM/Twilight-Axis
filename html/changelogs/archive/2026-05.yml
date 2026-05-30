@@ -2004,3 +2004,7 @@
   - bugfix: Placed the noticeboard in clinic in the proper position
   changelingonberry:
   - admin: Adds coordinates to lockpicking and doorbreaking
+2026-05-30:
+  Quinalion:
+  - bugfix: Fixed a bug where washing in water did not clear blood overlays from character
+      body sprites.

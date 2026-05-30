@@ -143,6 +143,8 @@
 	cultural_stock_pool = list(
 		/datum/supply_pack/rogue/valoria/valorian_swords,
 		/datum/supply_pack/rogue/valoria/valorian_greatsword,
+		/datum/supply_pack/rogue/valoria/valorian_cuirass,
+		/datum/supply_pack/rogue/valoria/valorian_halfplate,
 		/datum/supply_pack/rogue/valoria/valorian_plate,
 		/datum/supply_pack/rogue/grenzelhoft/blacksteel_cuirass,
 		/datum/supply_pack/rogue/zybantu/imperial_gold_finery,

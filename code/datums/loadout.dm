@@ -1310,18 +1310,6 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	category = list("Триумфы")
 	triumph_cost = 3
 
-/datum/loadout_item/triumph_heavygloves
-	name = "Heavy Leather Gloves"
-	path = /obj/item/clothing/gloves/roguetown/angle
-	category = list("Триумфы")
-	triumph_cost = 6
-
-/datum/loadout_item/triumph_heavyboots
-	name = "Heavy Leather Boots"
-	path = /obj/item/clothing/shoes/roguetown/boots/leather/reinforced
-	category = list("Триумфы")
-	triumph_cost = 6
-
 /datum/loadout_item/triumph_necklace
 	name = "Golden Necklace, Ornate"
 	path = /obj/item/clothing/neck/roguetown/ornateamulet/noble/triumph

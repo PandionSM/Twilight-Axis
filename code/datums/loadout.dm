@@ -122,6 +122,72 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/rogueweapon/mace/parasol/noble
 	donatitem = TRUE
 
+/datum/loadout_item/cloth
+	name = "Cloth"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/natural/cloth
+	triumph_cost = 10
+
+/datum/loadout_item/broom
+	name = "Broom"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/broom
+	triumph_cost = 10
+
+/datum/loadout_item/bucket
+	name = "Bucket"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/reagent_containers/glass/bucket
+	triumph_cost = 10
+
+/datum/loadout_item/needle
+	name = "Sewing Needle"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/needle/thorn
+	triumph_cost = 10
+
+/datum/loadout_item/whetstone
+	name = "Whetstone"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/natural/whetstone
+	triumph_cost = 10
+
+/datum/loadout_item/hammer
+	name = "Wood Mallet"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/rogueweapon/hammer/wood
+	triumph_cost = 10
+
+/datum/loadout_item/axe 
+	name = "Stone Axe"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/rogueweapon/stoneaxe
+	triumph_cost = 10
+
+/datum/loadout_item/knife 
+	name = "Stone Knife"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/rogueweapon/huntingknife/stoneknife
+	triumph_cost = 10
+
+/datum/loadout_item/hoe 
+	name = "Stone Hoe"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/rogueweapon/hoe/stone
+	triumph_cost = 10
+
+/datum/loadout_item/hoe 
+	name = "Wood Spade"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/rogueweapon/shovel/small
+	triumph_cost = 10
+
+/datum/loadout_item/mirror 
+	name = "Hand Mirror"
+	category = list("Разное", "Триумфы")
+	path = /obj/item/handmirror
+	triumph_cost = 10
+
 //HATS
 
 /datum/loadout_item/chaperon
@@ -842,6 +908,12 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/clothing/suit/roguetown/shirt/dress/maidfancy
 	donatitem = TRUE
 
+/datum/loadout_item/wedding_dress
+	name = "Wedding Dress"
+	category = list("Одежда", "Донат")
+	path = /obj/item/clothing/suit/roguetown/shirt/dress/silkdress/weddingdress
+	donatitem = TRUE
+
 /datum/loadout_item/maiddress
 	name = "Maid Dress"
 	category = list("Одежда", "Донат")
@@ -1040,6 +1112,12 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Paired belts"
 	category = "Аксессуары"
 	path = /obj/item/storage/belt/rogue/leather/double
+
+/datum/loadout_item/knifebelt // comes empty
+	name = "Tossblade Belt"
+	category = "Аксессуары"
+	path = /obj/item/storage/belt/rogue/leather/knifebelt/black
+	triumph_cost = 10
 
 /datum/loadout_item/psicross
 	name = "Psydonian Cross"
@@ -2915,6 +2993,11 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	category = list("Головные уборы", "Донат")
 	donatitem = TRUE
 	donat_tier = 2	
+
+/datum/loadout_item/shawl
+	name = "Shawl"
+	path = /obj/item/clothing/head/roguetown/shawl
+	category = "Головные уборы"
 
 /datum/loadout_item/maidband
 	name = "Maid Headdress"

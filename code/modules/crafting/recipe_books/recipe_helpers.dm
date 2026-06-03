@@ -265,32 +265,6 @@
 	if(displayed)
 		s_damage = "[displayed]"
 
-/proc/describe_item_transforms(atom/path)
-	if(!ispath(path, /obj/item/reagent_containers/food/snacks))
-		return ""
-	var/obj/item/reagent_containers/food/snacks/proto = path
-	var/list/parts = list()
-	var/cooked = initial(proto.cooked_type)
-	if(cooked && cooked != path)
-		var/atom/c = cooked
-		parts += "bakes into [initial(c.name)]"
-	var/fried = initial(proto.fried_type)
-	if(fried && fried != path && fried != cooked)
-		var/atom/f = fried
-		parts += "fries into [initial(f.name)]"
-	var/sliced = initial(proto.slice_path)
-	if(sliced && sliced != path)
-		var/atom/s = sliced
-		var/count = initial(proto.slices_num) || 1
-		parts += "slices into [count] x [initial(s.name)]"
-	var/dfried = initial(proto.deep_fried_type)
-	if(dfried && dfried != path)
-		var/atom/d = dfried
-		parts += "deep fries into [initial(d.name)]"
-	if(!length(parts))
-		return ""
-	return "<br>Becomes: [parts.Join("; ")]."
-=======
 	var/html = ""
 	html += "<h2 class='recipe-title'>[s_name]</h2>"
 	if(s_desc)
@@ -306,3 +280,36 @@
 	html += "<li><b>Invocation Type:</b> [s_invoc_label]</li>"
 	html += "</ul>"
 	return html
+
+/proc/describe_item_transforms(atom/path)
+	if(!ispath(path, /obj/item/reagent_containers/food/snacks))
+		return ""
+
+	var/obj/item/reagent_containers/food/snacks/proto = path
+	var/list/parts = list()
+
+	var/cooked = initial(proto.cooked_type)
+	if(cooked && cooked != path)
+		var/atom/c = cooked
+		parts += "bakes into [initial(c.name)]"
+
+	var/fried = initial(proto.fried_type)
+	if(fried && fried != path && fried != cooked)
+		var/atom/f = fried
+		parts += "fries into [initial(f.name)]"
+
+	var/sliced = initial(proto.slice_path)
+	if(sliced && sliced != path)
+		var/atom/s = sliced
+		var/count = initial(proto.slices_num) || 1
+		parts += "slices into [count] x [initial(s.name)]"
+
+	var/dfried = initial(proto.deep_fried_type)
+	if(dfried && dfried != path)
+		var/atom/d = dfried
+		parts += "deep fries into [initial(d.name)]"
+
+	if(!length(parts))
+		return ""
+
+	return "<br>Becomes: [parts.Join("; ")]."

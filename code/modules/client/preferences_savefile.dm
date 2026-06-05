@@ -8,7 +8,6 @@
 
 //	This also works with decimals.
 #define SAVEFILE_VERSION_MAX	33.9
-#define VIRTUE_SAVE_FORMAT_PATHS	2
 
 /*
 SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Carn
@@ -435,20 +434,59 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 		statpack = GLOB.statpacks[statpack]
 		//statpack = new statpack
 
-/datum/preferences/proc/normalize_saved_virtue_type(saved_value)
+/datum/preferences/proc/copy_virtue_choices(list/choices)
+	if(!islist(choices))
+		return list()
+	return choices.Copy()
+
+/datum/preferences/proc/get_saved_virtue_choices(savefile/S, choices_key)
+	var/list/choices
+	if(choices_key)
+		S[choices_key] >> choices
+	return copy_virtue_choices(choices)
+
+/datum/preferences/proc/normalize_saved_virtue(saved_value, savefile/S, choices_key)
+	var/virtue_type = /datum/virtue/none
+	var/list/choices = list()
+
 	if(ispath(saved_value, /datum/virtue))
-		return saved_value
-
-	if(istype(saved_value, /datum/virtue))
+		virtue_type = saved_value
+		choices = get_saved_virtue_choices(S, choices_key)
+	else if(istype(saved_value, /datum/virtue))
 		var/datum/virtue/loaded_virtue = saved_value
-		var/virtue_path = loaded_virtue.type
+		if(ispath(loaded_virtue.type, /datum/virtue))
+			virtue_type = loaded_virtue.type
+		choices = copy_virtue_choices(loaded_virtue.picked_choices)
 		qdel(loaded_virtue)
-		if(ispath(virtue_path, /datum/virtue))
-			return virtue_path
 
-	return /datum/virtue/none
+	return list(virtue_type, choices)
 
-/datum/preferences/proc/write_clean_virtue_paths(savefile/S, virtue_type = /datum/virtue/none, virtuetwo_type = /datum/virtue/none, origin_type = /datum/virtue/none)
+/datum/preferences/proc/validate_virtue_choices(datum/virtue/clean_virtue, list/choices)
+	if(!clean_virtue || !islist(choices))
+		return list()
+	if(length(choices) > clean_virtue.max_choices)
+		return list()
+
+	var/list/clean_choices = list()
+	for(var/choice in choices)
+		if(choice in clean_choices)
+			return list()
+		if(!(choice in clean_virtue.extra_choices))
+			return list()
+		clean_choices += choice
+
+	return clean_choices
+
+/datum/preferences/proc/load_clean_virtue(virtue_type, list/choices)
+	if(!ispath(virtue_type, /datum/virtue))
+		virtue_type = /datum/virtue/none
+
+	var/datum/virtue/clean_virtue = new virtue_type
+	clean_virtue.picked_choices = validate_virtue_choices(clean_virtue, choices)
+	clean_virtue.on_load()
+	return clean_virtue
+
+/datum/preferences/proc/write_clean_virtue_paths(savefile/S, virtue_type = /datum/virtue/none, virtuetwo_type = /datum/virtue/none, origin_type = /datum/virtue/none, list/virtue_choices = null, list/virtuetwo_choices = null)
 	if(!ispath(virtue_type, /datum/virtue))
 		virtue_type = /datum/virtue/none
 	if(!ispath(virtuetwo_type, /datum/virtue))
@@ -456,10 +494,11 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	if(!ispath(origin_type, /datum/virtue))
 		origin_type = /datum/virtue/none
 
-	WRITE_FILE(S["virtue_save_format"], VIRTUE_SAVE_FORMAT_PATHS)
 	WRITE_FILE(S["virtue"], virtue_type)
 	WRITE_FILE(S["virtuetwo"], virtuetwo_type)
 	WRITE_FILE(S["virtue_origin"], origin_type)
+	WRITE_FILE(S["virtue_choices"], copy_virtue_choices(virtue_choices))
+	WRITE_FILE(S["virtuetwo_choices"], copy_virtue_choices(virtuetwo_choices))
 
 /datum/preferences/proc/_load_virtue(S)
 	var/saved_virtue_type
@@ -469,18 +508,15 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	S["virtuetwo"] >> saved_virtuetwo_type
 	S["virtue_origin"] >> saved_origin_type
 
-	var/virtue_type = normalize_saved_virtue_type(saved_virtue_type)
-	var/virtuetwo_type = normalize_saved_virtue_type(saved_virtuetwo_type)
-	var/origin_type = normalize_saved_virtue_type(saved_origin_type)
+	var/list/virtue_data = normalize_saved_virtue(saved_virtue_type, S, "virtue_choices")
+	var/list/virtuetwo_data = normalize_saved_virtue(saved_virtuetwo_type, S, "virtuetwo_choices")
+	var/list/origin_data = normalize_saved_virtue(saved_origin_type, S, "virtue_origin_choices")
 
-	write_clean_virtue_paths(S, virtue_type, virtuetwo_type, origin_type)
+	virtue = load_clean_virtue(virtue_data[1], virtue_data[2])
+	virtuetwo = load_clean_virtue(virtuetwo_data[1], virtuetwo_data[2])
+	virtue_origin = load_clean_virtue(origin_data[1], origin_data[2])
 
-	virtue = new virtue_type
-	virtuetwo = new virtuetwo_type
-	virtue_origin = new origin_type
-
-	virtue.on_load()
-	virtuetwo.on_load()
+	write_clean_virtue_paths(S, virtue.type, virtuetwo.type, virtue_origin.type, virtue.picked_choices, virtuetwo.picked_choices)
 
 /datum/preferences/proc/_load_loadout(S)
 	S["selected_loadout_items"] >> selected_loadout_items
@@ -870,16 +906,14 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	S["virtue"] >> saved_virtue_type
 	S["virtuetwo"] >> saved_virtuetwo_type
 	S["virtue_origin"] >> saved_origin_type
-
-	var/virtue_type = normalize_saved_virtue_type(saved_virtue_type)
-	var/virtuetwo_type = normalize_saved_virtue_type(saved_virtuetwo_type)
-	var/origin_type = normalize_saved_virtue_type(saved_origin_type)
-
-	write_clean_virtue_paths(S, virtue_type, virtuetwo_type, origin_type)
 	
-	virtue = new virtue_type
-	virtuetwo = new virtuetwo_type
-	virtue_origin = new origin_type
+	var/list/virtue_data = normalize_saved_virtue(saved_virtue_type, S, "virtue_choices")
+	var/list/virtuetwo_data = normalize_saved_virtue(saved_virtuetwo_type, S, "virtuetwo_choices")
+	var/list/origin_data = normalize_saved_virtue(saved_origin_type, S, "virtue_origin_choices")
+
+	virtue = load_clean_virtue(virtue_data[1], virtue_data[2])
+	virtuetwo = load_clean_virtue(virtuetwo_data[1], virtuetwo_data[2])
+	virtue_origin = load_clean_virtue(origin_data[1], origin_data[2])
 
 	
 	charflaws.Cut()
@@ -1009,7 +1043,7 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	WRITE_FILE(S["titles_pref"] , titles_pref)
 	WRITE_FILE(S["clothes_pref"] , clothes_pref)
 	WRITE_FILE(S["statpack"] , statpack.type)
-	write_clean_virtue_paths(S, virtue ? virtue.type : /datum/virtue/none, virtuetwo ? virtuetwo.type : /datum/virtue/none, virtue_origin ? virtue_origin.type : /datum/virtue/none)
+	write_clean_virtue_paths(S, virtue ? virtue.type : /datum/virtue/none, virtuetwo ? virtuetwo.type : /datum/virtue/none, virtue_origin ? virtue_origin.type : /datum/virtue/none, virtue ? virtue.picked_choices : null, virtuetwo ? virtuetwo.picked_choices : null)
 	WRITE_FILE(S["race_bonus"], race_bonus)
 	var/combat_music_save_type = default_cmusic_type // TA EDIT START
 	if(!custom_cmode_enabled && combat_music)
@@ -1053,7 +1087,6 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 
 	return TRUE
 
-#undef VIRTUE_SAVE_FORMAT_PATHS
 #undef SAVEFILE_VERSION_MAX
 #undef SAVEFILE_VERSION_MIN
 

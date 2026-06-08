@@ -10,6 +10,12 @@
 	base_state = "standingr"
 	bulb_colour = "#f02929"
 
+/obj/machinery/light/rogue/firebowl/standing/purple
+	desc = "Mysterious purple flame"
+	icon_state = "standingp1"
+	base_state = "standingp"
+	bulb_colour = "#9d2dff"
+
 /obj/machinery/light/rogue/candle/green
 	bulb_colour = "#60f382"
 	icon_state = "wallcandleg1"
@@ -22,6 +28,13 @@
 	icon_state = "wallcandler1"
 	base_state = "wallcandler"
 	desc = "Tiny red flames flicker gently like the stars themselves. Mana-infused wax \
+	is rather expensive, but makes quite an impression!"
+
+/obj/machinery/light/rogue/candle/purple
+	bulb_colour = "#9d2dff"
+	icon_state = "wallcandlep1"
+	base_state = "wallcandlep"
+	desc = "Tiny purple flames flicker gently like the stars themselves. Mana-infused wax \
 	is rather expensive, but makes quite an impression!"
 
 /obj/machinery/light/rogue/candle/red/r
@@ -37,5 +50,13 @@
 	pixel_x = 32
 
 /obj/machinery/light/rogue/candle/green/l
+	pixel_y = 0
+	pixel_x = -32
+
+/obj/machinery/light/rogue/candle/purple/r
+	pixel_y = 0
+	pixel_x = 32
+
+/obj/machinery/light/rogue/candle/purple/l
 	pixel_y = 0
 	pixel_x = -32

@@ -64,7 +64,7 @@
 	restraint_check = TRUE
 
 /mob/living/carbon/human/verb/emote_clap1()
-	set name = "Хлопнуть один раз"
+	set name = "Хлопнуть"
 	set category = "Emotes.Noises"
 
 	emote("clap1", intentional = TRUE)

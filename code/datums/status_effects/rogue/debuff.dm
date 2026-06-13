@@ -490,7 +490,7 @@
 /datum/status_effect/debuff/permadeath
 	id = "permadeath"
 	alert_type = /atom/movable/screen/alert/status_effect/debuff/permadeath
-	duration = 10 MINUTES //Effectively determines how long a character is threatened with permadeath. Kicks into gear once the initial deathmark-imposed grace period completes. Timed to match Revival Sickness.
+	duration = 60 MINUTES //Effectively determines how long a character is threatened with permadeath. Kicks into gear once the initial deathmark-imposed grace period completes. Timed to match Revival Sickness.
 
 /atom/movable/screen/alert/status_effect/debuff/permadeath
 	name = "Death's Door"

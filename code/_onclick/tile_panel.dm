@@ -53,7 +53,7 @@
 	var/last_refresh_at = 0
 	var/refresh_queued = FALSE
 	var/last_context_ref
-	var/refresh_throttle_ds = TILEPANEL_REFRESH_THROTTLE_DSф
+	var/refresh_throttle_ds = TILEPANEL_REFRESH_THROTTLE_DS
 	var/list/appearance_cache
 	var/list/row_cache
 	var/icon_serial = 0

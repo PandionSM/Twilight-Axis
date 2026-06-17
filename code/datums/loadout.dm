@@ -650,8 +650,9 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 
 /datum/loadout_item/silkanklets
 	name = "Silk Anklets"
-	category = "Обувь"
+	category = list("Обувь", "Триумфы")
 	path = /obj/item/clothing/shoes/roguetown/anklets
+	triumph_cost = 4
 
 /datum/loadout_item/rumaclanshoes
 	name = "Raised Sandals"
@@ -718,7 +719,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Giltsilk Bra"
 	category = list("Одежда", "Триумфы")
 	path = /obj/item/clothing/suit/roguetown/shirt/silkbra
-	triumph_cost = 3
+	triumph_cost = 4
 
 /datum/loadout_item/desertbra
 	name = "Desert Bra"
@@ -1003,7 +1004,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Giltsilk Belt"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/silkbelt
-	triumph_cost = 3
+	triumph_cost = 5
 
 /datum/loadout_item/ragmask
 	name = "Rag Mask"
@@ -1030,7 +1031,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Giltsilk Mask"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/clothing/mask/rogue/silkmask
-	triumph_cost = 3
+	triumph_cost = 4
 
 /datum/loadout_item/duelmaskc
 	name = "Duelist's Mask"
@@ -1106,25 +1107,25 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Cloth military skirt"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/battleskirt
-	triumph_cost = 2
+	triumph_cost = 3
 
 /datum/loadout_item/fauldedbelt
 	name = "Belt with faulds"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/battleskirt/faulds
-	triumph_cost = 2
+	triumph_cost = 3
 
 /datum/loadout_item/doublebelt
 	name = "Paired belts"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/double
-	triumph_cost = 3
+	triumph_cost = 4
 
 /datum/loadout_item/knifebelt // comes empty
 	name = "Tossblade Belt"
 	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/knifebelt/black
-	triumph_cost = 3
+	triumph_cost = 4
 
 /datum/loadout_item/psicross
 	name = "Psydonian Cross"
@@ -3463,18 +3464,21 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 
 /datum/loadout_item/breechclothbelt
 	name = "Belt with Breechcloth"
-	category = "Аксессуары"
+	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/battleskirt/breechcloth
+	triumph_cost = 3
 
 /datum/loadout_item/breechclothbeltalt
 	name = "Black Belt with Breechcloth"
-	category = "Аксессуары"
+	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/battleskirt/breechcloth/blackbelt
+	triumph_cost = 3
 
 /datum/loadout_item/blackbelt
 	name = "Black Belt"
-	category = "Аксессуары"
+	category = list("Аксессуары", "Триумфы")
 	path = /obj/item/storage/belt/rogue/leather/black
+	triumph_cost = 3
 
 /datum/loadout_item/darkcloak
 	name = "Dark Cloak"
@@ -3658,7 +3662,6 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	path = /obj/item/storage/belt/rogue/leather/donator_iron
 	donatitem = TRUE
 
-
 /datum/loadout_item/donator/drd/caparison
 	name = "Donator Item - House Woerden Caparison"
 	category = list("Разное", "Донат")
@@ -3759,6 +3762,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	category = "Разное"
 	path = /obj/item/toy/cards/deck/tarot/majorarcana
 	donatitem = TRUE
+	donat_tier = 2
 
 /datum/loadout_item/triumph_satchel
 	name = "Satchel"
@@ -3776,7 +3780,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Cloth"
 	category = list("Разное", "Триумфы")
 	path = /obj/item/natural/cloth
-	triumph_cost = 3
+	triumph_cost = 2
 
 /datum/loadout_item/psicross/noc/bronze
 	name = "Bronze Amulet of Noc"
@@ -3842,7 +3846,7 @@ GLOBAL_LIST_EMPTY(loadout_items_by_category)
 	name = "Winter Dress"
 	category = list("Триумфы")
 	path = /obj/item/clothing/suit/roguetown/armor/armordress/winterdress/triumph
-	triumph_cost = 3
+	triumph_cost = 4
 
 /datum/loadout_item/triumph_steelbelt
 	name = "Belt of Steel"

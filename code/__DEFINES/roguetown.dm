@@ -159,7 +159,6 @@ Balloon Alert / Floating Text defines
 	/datum/species/dwarf/gnome,\
 	/datum/species/construct/metal,\
 	/datum/species/ooze,\
-	/datum/species/construct/metal,\
 
 // All but elves & half-elves.
 #define RACES_BLACKOAK \
@@ -185,7 +184,6 @@ Balloon Alert / Floating Text defines
 	/datum/species/dwarf/gnome,\
 	/datum/species/construct/metal,\
 	/datum/species/ooze,\
-	/datum/species/construct/metal,\
 
 // All but dwarves.
 #define RACES_GRUDGE \
@@ -214,7 +212,6 @@ Balloon Alert / Floating Text defines
 	/datum/species/dwarf/gnome,\
 	/datum/species/construct/metal,\
 	/datum/species/ooze,\
-	/datum/species/construct/metal,\
 
 // All but Dwarves, Gnomes, Kobolds, D. Elves, Oozes, Moths & Anthrosmall
 #define RACES_UNDERDARK \
@@ -263,7 +260,6 @@ Balloon Alert / Floating Text defines
 	/datum/species/dwarf/gnome,\
 	/datum/species/construct/metal,\
 	/datum/species/ooze,\
-	/datum/species/construct/metal,\
 
 
 #define NOBLE_RACES_TYPES list(\

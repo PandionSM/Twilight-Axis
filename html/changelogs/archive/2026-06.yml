@@ -1116,3 +1116,17 @@
   eirenxiv:
   - bugfix: 'excluded constructs from: Black Oaks, Grudgebearer an Anthraxi'
   - bugfix: excluded gnomes from Grudgebearers
+2026-06-23:
+  Ollanius:
+  - balance: Holy steel recipes now require an amulet of the item's patron to complete,
+      in order to reduce the amount of cases where Templar-specific items could be
+      made by non-Templaric forces.
+  Rannoooo:
+  - rscadd: option for slurbow added to outlaw wretch.
+  Ratvarr:
+  - rscadd: Kazengunite god-names now work for prayers! + A few others
+  ToasterStrudes:
+  - bugfix: attempting to salvage Triumph items no longer runtimes.
+  WeNeedMorePhoron:
+  - rscadd: Ported OV's improved loadout management of spells. Renamed "Select Loadout"
+      to "Loadout Manager"
